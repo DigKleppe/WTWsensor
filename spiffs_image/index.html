@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>BatterijTester</title>
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="js/chart.js" type="text/javascript" charset="utf-8"></script>
+	<script src="js/common.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		google.charts.load('current', {
+			'packages': ['corechart']
+		});
+		google.charts.setOnLoadCallback(initChart);
+		google.load("visualization", "1", {packages: ["corechart"]});
+	</script>
+</head>
+
+<body>
+	<div id="chart" style="width: 100%; height: 800px"></div>
+	<br>
+
+	<button id='startStopButton' class="button-3" onclick="startStop()">stop</button>
+	<button class="button-3" onclick="clearLog()">log wissen</button>
+	<button class="button-3" onclick="clearChart()">grafiek wissen</button>
+	<button class="button-3" onclick="refreshChart()">grafiek verversen</button>
+	<br>
+	<br>
+	<table" >
+		<tbody>
+			<tr style = "height: 120px" >
+				<td><label >Functie:</label></td>
+				<td> <input type="radio" class = 'rw-rb-state' id="testRb" name="FunctionRb" value="Testen" onclick="functionRbClick(this.value)" >
+					<label for="testRb">Testen</label>
+				</td>
+				<td> <input type="radio" class = 'rw-rb-state' id="chargeRb" name="FunctionRb" value="Laden" onclick="functionRbClick(this.value)">
+					<label for="chargeRb">Laden</label>
+				</td>
+				<td><input type="radio" class = 'rw-rb-state' id="chargeRb" name="FunctionRb" value="Ontladen" onclick="functionRbClick(this.value)" >
+					<label for="dischargeRb">Ontladen</label>
+				</td>
+			</tr>
+		</tbody>
+		</table>
+		<br>
+		<table id="cbTable" class="styled-table">
+			<tbody>
+				<tr>
+					<th style="text-align:left"> Positie:</th>
+					<th>1</th>
+					<th>2</th>
+					<th>3</th>
+					<th>4</th>
+				</tr>
+				<tr>
+					<th style="text-align:left">Grafiek:</th>
+					<td><input type="checkbox" id="T1cb" class="save-cb-state" name="T1cb" value="yes"></td>
+					<td><input type="checkbox" id="T2cb" class="save-cb-state" name="T2cb" value="yes"></td>
+					<td><input type="checkbox" id="T3cb" class="save-cb-state" name="T3cb" value="yes"></td>
+					<td><input type="checkbox" id="T4cb" class="save-cb-state" name="T4cb" value="yes"></td>
+				</tr>
+			</tbody>
+		</table>
+		<br>
+		<table id="chargeInfoTable" class="styled-table">
+		</table>
+		<br>
+		<a href="settings.html">Instellingen</a>
+</body>
+
+</html>
