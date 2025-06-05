@@ -234,7 +234,7 @@ void sensirionTask(void *pvParameter) {
 			rawlastVal.temperature = airSensor.getTemperature();
 			lastVal.temperature = rawlastVal.temperature - userSettings.temperatureOffset; // SDC30 not accurate enough, use NTC
 
-			if (lastVal.co2 > 300) { // first measurement invalid, reject
+			if (lastVal.co2 > 400) { // first measurement invalid, reject
 				//	lastVal.temperature  = airSensor.getTemperature() - userSettings.temperatureOffset; NTC used
 				rawlastVal.hum = airSensor.getHumidity();
 				lastVal.hum = rawlastVal.hum - userSettings.RHoffset;
@@ -242,8 +242,7 @@ void sensirionTask(void *pvParameter) {
 				lastVal.timeStamp = timeStamp++;
 		//		ESP_LOGI(TAG, "t: %f co2:%f", lastVal.temperature, lastVal.co2);
 			}
-
-			sprintf(str, "1:%2.0f,%2.2f,%3.1f", lastVal.co2, lastVal.temperature, lastVal.hum);
+			sprintf(str, "%s 1:%2.0f,%2.2f,%3.1f", userSettings.moduleName, lastVal.co2, lastVal.temperature, lastVal.hum);
 			UDPsendMssg(UDPTXPORT, str, strlen(str));
 			ESP_LOGI(TAG, "%s", str);
 

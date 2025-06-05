@@ -3,14 +3,15 @@
     "idf.espIdfPath": "/home/dig/esp/esp-idf-v5.4.1",
     "idf.pythonInstallPath": "/usr/bin/python3",
     "idf.openOcdConfigs": [
-        "board/esp32s3-builtin.cfg"
+        "interface/ftdi/esp32_devkitj_v1.cfg",
+        "target/esp32.cfg"
     ],
-    "idf.port": "/dev/ttyACM0",
+    "idf.port": "/dev/ttyUSB1",
     "idf.toolsPath": "/home/dig/.espressif",
     "idf.customExtraVars": {
-        "IDF_TARGET": "esp32s3"
+        "IDF_TARGET": "esp32"
     },
-    "idf.flashType": "UART",
+    "idf.flashType": "JTAG",
     "files.associations": {
         "cstdlib": "cpp"
     }

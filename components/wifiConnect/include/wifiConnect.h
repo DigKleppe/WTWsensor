@@ -45,7 +45,7 @@ extern bool DHCPoff;
 extern bool DNSoff;
 extern bool fileServerOff;
 
-typedef enum { CONNECTING, CONNECTED, SMARTCONFIG_ACTIVE, WPS_ACTIVE, IP_RECEIVED} connectStatus_t;
+typedef enum { CONNECTING, CONNECTED, SMARTCONFIG_ACTIVE,WPS_ACTIVE_1, WPS_ACTIVE, IP_RECEIVED} connectStatus_t;
 
 extern volatile  connectStatus_t connectStatus;
 
@@ -82,6 +82,9 @@ void wifiConnect (void);
 #define EXAMPLE_INTERFACE get_netif_from_desc(EXAMPLE_NETIF_DESC_STA)
 #define get_netif() get_netif_from_desc(EXAMPLE_NETIF_DESC_STA)
 #endif
+
+
+int getRssi(void);  
 
 /**
  * @brief Configure Wi-Fi or Ethernet, connect, wait for IP

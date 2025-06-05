@@ -1,12 +1,4 @@
 
-/* WiFi station Example
-
- This example code is in the Public Domain (or CC0 licensed, at your option.)
-
- Unless required by applicable law or agreed to in writing, this
- software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- CONDITIONS OF ANY KIND, either express or implied.
- */
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
@@ -27,7 +19,6 @@
 #include "esp_smartconfig.h"
 #include "wifiConnect.h"
 
-#include "../../main/include/CGItable.h"
 
 /*set wps mode via project configuration */
 #if CONFIG_EXAMPLE_WPS_TYPE_PBC
@@ -129,8 +120,18 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_FAIL_BIT BIT1
 #define CONNECTED_BIT BIT0
 static const int ESPTOUCH_DONE_BIT = BIT2;
-
+ 
 static const char *TAG = "wifiConnect";
+
+int getRssi(void) {
+	wifi_ap_record_t ap_info;
+	if (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK) {
+		return ap_info.rssi;
+	} else {
+		ESP_LOGE(TAG, "Failed to get AP info");
+		return 0;
+	}	
+}
 
 static void setStaticIp(esp_netif_t *netif) {
 	if (esp_netif_dhcpc_stop(netif) != ESP_OK) {
@@ -508,5 +509,5 @@ void wifi_stop(void) {
 
 void wifiConnect(void) {
 	wifi_init_sta();
-	g_pCGIs = CGIurls; // for file_server to read CGIurls
+//	g_pCGIs = CGIurls; // for file_server to read CGIurls
 }
