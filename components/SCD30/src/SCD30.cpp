@@ -255,7 +255,7 @@ bool SCD30::dataAvailable() {
 	uint16_t response = 0;
 
 	if (gpio_get_level(READYPIN) == 1) { // If the SCD30 is not ready, return false
-		ESP_LOGI(TAG, "SCD30 ready");
+	//	ESP_LOGI(TAG, "SCD30 ready");
 		return true;
 	}
 	// readRegister(COMMAND_GET_DATA_READY, &response);

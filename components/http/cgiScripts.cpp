@@ -110,7 +110,9 @@ int readActionScript(char *pcParam, const CGIdesc_t *CGIdescTable, int size) {
 				strncpy(name, p, n);
 				name[n] = 0;
 				for (m = 0; m < size; m++) {
-					if (strcmp(name, CGIdescTable->name) == 0) { // found
+	
+		//	printf("\n%s ", CGIdescTable->name);
+				if (strcmp(name, CGIdescTable->name) == 0) { // found
 						if (p[n + 1] != '&') { // empty value
 							switch (CGIdescTable->type) {
 							case FLT:

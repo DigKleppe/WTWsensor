@@ -11,9 +11,7 @@ var INFOTABLENAME = "infoTable";
 var CALTABLENAME = "calTable";
 var NAMETABLENAME = "nameTable";
 
-var calRun = false;
-var charge = true;
-var testCurrent;
+
 
 function makeNameTable(descriptorData) {
 	var colls;
@@ -49,8 +47,8 @@ function makeNameTable(descriptorData) {
 			cell.appendChild(input);
 			row.appendChild(cell);
 
-			cell = document.createElement("td");
-			cell.setAttribute("nameItem", i);
+		//	cell = document.createElement("td");
+		//	cell.setAttribute("nameItem", i);
 
 			var button = document.createElement("button");
 			button.innerHTML = "Stel in";
@@ -60,11 +58,6 @@ function makeNameTable(descriptorData) {
 
 			cell = document.createElement("td");
 			cell.setAttribute("nameItem", i);
-
-			var button = document.createElement("button");
-			button.innerHTML = "Herstel";
-			button.className = "button-3";
-			button.setAttribute("id", "set" + i);
 
 			cell.appendChild(button);
 			row.appendChild(cell);
@@ -83,16 +76,16 @@ function setNameFunction(row, coll) {
 	console.log("Row index:" + row + " Collumn: " + coll);
 	var item = nameTbl.rows[row].cells[0].innerText;
 
-	if (coll == 3)
-		sendItem("revertName");
-	else {
+//	if (coll == 3)
+//		sendItem("revertName");
+//	else {
 		var value = nameTbl.rows[row].cells[1].firstChild.value;
 		console.log(item + value);
 		if (value != "") {
 			sendItem("setName:moduleName=" + value);
 		}
 		makeNameTable(value);
-	}
+//	}
 }
 
 function makeInfoTable(descriptorData) {
@@ -160,8 +153,8 @@ function makeCalTable(descriptorData) {
 			cell.appendChild(input);
 			row.appendChild(cell);
 
-			cell = document.createElement("td");
-			cell.setAttribute("calItem", i);
+		//	cell = document.createElement("td");
+		//	cell.setAttribute("calItem", i);
 
 			var button = document.createElement("button");
 			button.innerHTML = "Stel in";
@@ -172,12 +165,6 @@ function makeCalTable(descriptorData) {
 
 			cell = document.createElement("td");
 			cell.setAttribute("calItem", i);
-
-			var button = document.createElement("button");
-			button.innerHTML = "Herstel";
-			//	button.className = "button buttonGreen";
-			button.className = "button-3";
-			button.setAttribute("id", "set" + i);
 
 			cell.appendChild(button);
 			row.appendChild(cell);
@@ -260,15 +247,16 @@ function initSettings() {
 	readCalInfo();
 	str = getItem("getSensorName");
 	makeNameTable(str);
-	var rbutton = document.getElementById("c1");
-	rbutton.checked = true;
-	testCurrent = rbutton.value;
 
-	rbutton.addEventListener("click", setCurrentLo);
-	rbutton = document.getElementById("c2");
-	rbutton.addEventListener("click", setCurrentMed);
-	rbutton = document.getElementById("c3");
-	rbutton.addEventListener("click", setCurrentHi);
+	// var rbutton = document.getElementById("c1");
+	// rbutton.checked = true;
+	// testCurrent = rbutton.value;
+
+	// rbutton.addEventListener("click", setCurrentLo);
+	// rbutton = document.getElementById("c2");
+	// rbutton.addEventListener("click", setCurrentMed);
+	// rbutton = document.getElementById("c3");
+	// rbutton.addEventListener("click", setCurrentHi);
 
 	setInterval(function() { settingsTimer() }, 1000);
 }
@@ -323,43 +311,5 @@ function startStop() {
 	}
 }
 
-function setMode() {
-	var button = document.getElementById("setModeButton");
-	charge = !charge;
-	if (charge) {
-		button.innerHTML = "  Laden";
-		button.style.backgroundColor = "Red";
-		if (testCurrent < 0)
-			testCurrent = -testCurrent;
-	}
-	else {
-		button.innerHTML = "Ontladen";
-		button.style.backgroundColor = "Blue";
-		if (testCurrent > 0)
-			testCurrent = -testCurrent;
-	}
-	if (calRun)
-		sendItem("setCurrent=" + testCurrent);
-}
 
-function setCurrent( curr){
-	if (charge == false)
-		curr = -curr;
-	if (calRun)
-		sendItem("setCurrent=" + curr);
-}
-
-function setCurrentLo() {
-	var rb = document.getElementById("c1");
-	setCurrent (rb.value);
-
-}
-function setCurrentMed() {
-	var rb = document.getElementById("c2");
-	setCurrent (rb.value);
-}
-function setCurrentHi() {
-	var rb = document.getElementById("c3");
-	setCurrent (rb.value);
-}
 

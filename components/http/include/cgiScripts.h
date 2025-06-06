@@ -30,7 +30,7 @@ typedef struct {
 	int nrValues;
 } CGIdesc_t;
 
-extern const CGIdesc_t writeVarDescriptors[];
+
 void parseCGIWriteData(char * buf, int received);
 int readActionScript(char *pcParam, const CGIdesc_t *CGIdescTable, int size );
 const char* startCGIscript(int iIndex, char *pcParam);

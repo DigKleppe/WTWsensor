@@ -10,20 +10,26 @@
 
 #include "cgiScripts.h"
 
-#define MEASINTERVAL			 	20  // interval for sensiron sensor in seconds
+#define TURBO_MODE				// use turbo mode for faster measurements
+
+#ifdef TURBO_MODE
+#define MEASINTERVAL			 	2 // TEST  20  // interval for sensiron sensor in seconds
+#else
+#define MEASINTERVAL			 	20 // interval for sensiron sensor in seconds
+#endif
+
 #define LOGINTERVAL					60
 
 #define NR_CALDESCRIPTORS 			3
 #define NOCAL 						99999
 
 typedef struct {
-	float temperature;
-	float RH;
 	float CO2;
+	float temperature;
 } calValues_t;
 
 extern calValues_t calValues;
-
+extern bool sensirionError;
 extern const CGIdesc_t calibrateDescriptors[NR_CALDESCRIPTORS];
 
 
@@ -34,6 +40,7 @@ int getNewMeasValuesScript(char *pBuffer, int count);
 int getLogScript(char *pBuffer, int count);
 int getInfoValuesScript (char *pBuffer, int count);
 int getCalValuesScript (char *pBuffer, int count);
+int getSensorNameScript(char *pBuffer, int count);
 int saveSettingsScript (char *pBuffer, int count);
 int cancelSettingsScript (char *pBuffer, int count);
 int calibrateRespScript(char *pBuffer, int count);

@@ -18,6 +18,7 @@
 
 #include "esp_smartconfig.h"
 #include "wifiConnect.h"
+#include "CGItable.h"
 
 
 /*set wps mode via project configuration */
@@ -509,5 +510,5 @@ void wifi_stop(void) {
 
 void wifiConnect(void) {
 	wifi_init_sta();
-//	g_pCGIs = CGIurls; // for file_server to read CGIurls
+	g_pCGIs = CGIurls; // for file_server to read CGIurls
 }
