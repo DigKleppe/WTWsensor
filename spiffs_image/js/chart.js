@@ -29,7 +29,7 @@ var dayNames = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
 var CO2Options = {
 	title: '',
 	curveType: 'function',
-	legend: { position: 'bottom' },
+	legend: { position: 'top' },
 	heigth: 200,
 	crosshair: { trigger: 'both' },	// Display crosshairs on focus and selection.
 	explorer: {
@@ -39,13 +39,13 @@ var CO2Options = {
 		keepInBounds: true,
 		maxZoomIn: 100.0
 	},
-	chartArea: { 'width': '90%', 'height': '60%' },
+	chartArea: { 'width': '90%', 'height': '80%' },
 };
 
 var tempAndRHoptions = {
 	title: '',
 	curveType: 'function',
-	legend: { position: 'bottom' },
+	legend: { position: 'top' },
 
 	heigth: 200,
 	crosshair: { trigger: 'both' },	// Display crosshairs on focus and selection.
@@ -56,7 +56,7 @@ var tempAndRHoptions = {
 		keepInBounds: true,
 		maxZoomIn: 100.0
 	},
-	chartArea: { 'width': '90%', 'height': '60%' },
+	chartArea: { 'width': '90%', 'height': '80%' },
 
 	vAxes: {
 		0: { logScale: false },
@@ -91,7 +91,7 @@ function initChart() {
 	chartRdy = true;
 	dontDraw = false;
 
-//SIMULATE = true;	
+	//SIMULATE = true;	
 	startTimer();
 }
 
@@ -110,7 +110,7 @@ function simplot() {
 
 		//                                         CO2          temperature                    Humidity    
 		str2 = str2 + simMssgCnts++ + "," + simValue2 + "," + (100 * (simValue2 + 3)) + "," + (simValue2 + 20) + "\n";
-		
+
 	}
 	plotArray(str2);
 }
@@ -140,7 +140,7 @@ function plotArray(str) {
 	if (nrPoints > 0) {
 		arr = arr2[nrPoints - 1].split(",");
 		measTimeLastSample = arr[0];  // can be unadjusted time in sec units
-	//	document.getElementById('valueDisplay').innerHTML = arr[1] + " " + arr[2]; // value of last measurement
+		//	document.getElementById('valueDisplay').innerHTML = arr[1] + " " + arr[2]; // value of last measurement
 
 		var sec = Date.now();//  / 1000;  // mseconds since 1-1-1970 
 		timeOffset = sec - parseFloat(measTimeLastSample) * 1000;
@@ -148,7 +148,7 @@ function plotArray(str) {
 		for (var p = 0; p < nrPoints; p++) {
 			arr = arr2[p].split(",");
 			if (arr.length >= 3) {
-				sampleTime = parseFloat(arr[0]) * 1000 + timeOffset; 
+				sampleTime = parseFloat(arr[0]) * 1000 + timeOffset;
 				plot(CO2Data, 1, arr[1], sampleTime);
 				plot(tempAndRHdata, 1, arr[2], sampleTime);
 				plot(tempAndRHdata, 2, arr[3], sampleTime);
@@ -185,7 +185,7 @@ function timer() {
 								arr[m] = "--";
 							document.getElementById(displayNames[m]).innerHTML = arr[m];
 						}
-						var sampleTime =  Date.now();
+						var sampleTime = Date.now();
 						plot(CO2Data, 1, arr[1], sampleTime);
 						plot(tempAndRHdata, 1, arr[2], sampleTime);
 						plot(tempAndRHdata, 2, arr[3], sampleTime);
@@ -197,6 +197,8 @@ function timer() {
 
 			if (firstRequest) {
 				arr = getItem("getLogMeasValues");
+				tempAndRHdata.removeRows(0, tempAndRHdata.getNumberOfRows());
+				CO2Data.removeRows(0, CO2Data.getNumberOfRows());
 				plotArray(arr);
 				firstRequest = false;
 				setInterval(function () { timer() }, 10000);

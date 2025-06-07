@@ -11,7 +11,7 @@
     "idf.customExtraVars": {
         "IDF_TARGET": "esp32"
     },
-    "idf.flashType": "UART",
+    "idf.flashType": "JTAG",
     "files.associations": {
         "cstdlib": "cpp",
         "chrono": "cpp",

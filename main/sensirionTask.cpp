@@ -21,7 +21,8 @@
 #include <cstring>
 #include <math.h>
 
-#define UDPTXPORT 5001
+#define UDPTXPORT 5050
+#define OLDUDPTXPORT 5001
 #define MAXRETRIES 5
 #define SCD30_TIMEOUT 600
 
@@ -169,13 +170,11 @@ void sensirionTask(void *pvParameter) {
 int printLog(log_t *logToPrint, char *pBuffer) {
 	int len;
 	len = sprintf(pBuffer, "%lu,", logToPrint->timeStamp);
-	len += sprintf(pBuffer + len, "%3.0f,", lastVal.co2);
-	len += sprintf(pBuffer + len, "%3.2f,", lastVal.temperature);
-	len += sprintf(pBuffer + len, "%3.2f\n", lastVal.hum);
+	len += sprintf(pBuffer + len, "%3.0f,", logToPrint->co2);
+	len += sprintf(pBuffer + len, "%3.2f,", logToPrint->temperature);
+	len += sprintf(pBuffer + len, "%3.2f\n", logToPrint->hum);
 	return len;
 }
-
-
 
 // prints last measurement values
 int getRTMeasValuesScript(char *pBuffer, int count) {
