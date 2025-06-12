@@ -1,3 +1,7 @@
+/*
+handles wifi connect process
+
+*/
 
 #include "esp_event.h"
 #include "esp_log.h"
@@ -18,8 +22,9 @@
 
 #include "esp_smartconfig.h"
 #include "wifiConnect.h"
-#include "CGItable.h"
-
+#ifndef CONFIG_FIXED_LAST_IP_DIGIT
+#define CONFIG_FIXED_LAST_IP_DIGIT 97 // ip will be xx.xx.xx.pp    xx from DHCP  , <= 0 disables this
+#endif
 
 /*set wps mode via project configuration */
 #if CONFIG_EXAMPLE_WPS_TYPE_PBC
@@ -51,6 +56,7 @@ bool DHCPoff;
 bool IP6off;
 bool DNSoff;
 bool fileServerOff;
+bool fixedLastIPdigit = true;
 
 bool doStop;
 esp_netif_t *s_sta_netif = NULL;
@@ -76,7 +82,6 @@ wifiSettings_t wifiSettingsDefaults = {
  */
 
 #define EXAMPLE_ESP_MAXIMUM_RETRY 2
-#define EXAMPLE_H2E_IDENTIFIER ""
 #define CONFIG_ESP_WPA3_SAE_PWE_BOTH 1
 #define ESP_WIFI_SAE_MODE WPA3_SAE_PWE_BOTH
 #define CONFIG_ESP_WIFI_PW_ID ""
@@ -121,7 +126,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_FAIL_BIT BIT1
 #define CONNECTED_BIT BIT0
 static const int ESPTOUCH_DONE_BIT = BIT2;
- 
+
 static const char *TAG = "wifiConnect";
 
 int getRssi(void) {
@@ -134,10 +139,10 @@ int getRssi(void) {
 	}	
 }
 
+
 static void setStaticIp(esp_netif_t *netif) {
 	if (esp_netif_dhcpc_stop(netif) != ESP_OK) {
-		ESP_LOGE(TAG, "Failed to stop dhcp client");
-		return;
+	//	ESP_LOGE(TAG, "Failed to stop dhcp client");
 	}
 	esp_netif_ip_info_t ip;
 	memset(&ip, 0, sizeof(esp_netif_ip_info_t));
@@ -337,6 +342,9 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 		ESP_LOGI(TAG, "IP_EVENT %d", (int)event_id);
 		switch (event_id) {
 		case IP_EVENT_STA_GOT_IP: {
+			ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+			sprintf(myIpAddress, IPSTR, IP2STR(&event->ip_info.ip));
+
 #ifdef CONFIG_WPS_ENABLED
 
 			if (wpsTimer != NULL) {
@@ -356,11 +364,34 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 				}
 				wpsActive = false;
 			}
+
 #endif
-			xEventGroupSetBits(s_wifi_event_group, CONNECTED_BIT);
-			ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
-			sprintf(myIpAddress, IPSTR, IP2STR(&event->ip_info.ip));
-			connectStatus = IP_RECEIVED;
+			if( CONFIG_FIXED_LAST_IP_DIGIT > 0) { // check if the last digit of IP address = CONFIG_FIXED_LAST_IP_DIGIT
+				uint32_t addr = event->ip_info.ip.addr;
+				
+				if ( (addr & 0xFF000000) == (CONFIG_FIXED_LAST_IP_DIGIT << 24) ) {  // last ip digit(LSB) is MSB in addr 
+					xEventGroupSetBits(s_wifi_event_group, CONNECTED_BIT); // ok
+					connectStatus = IP_RECEIVED;
+				}
+				else {
+					wifiSettings.ip4Address = (esp_ip4_addr_t)( (addr & 0x00FFFFFF) + (CONFIG_FIXED_LAST_IP_DIGIT << 24));
+					sprintf(myIpAddress, IPSTR, IP2STR(&wifiSettings.ip4Address));
+					saveSettings();
+					ESP_LOGI(TAG, "Set static IP to %s , reconnecting", (myIpAddress));
+					setStaticIp( s_sta_netif);
+					esp_wifi_disconnect();
+					esp_wifi_connect();
+					if (!DNSoff)
+						initialiseMdns(userSettings.moduleName);
+				}
+			}
+
+			else {
+				xEventGroupSetBits(s_wifi_event_group, CONNECTED_BIT);
+				connectStatus = IP_RECEIVED;
+				if (!DNSoff)
+					initialiseMdns(userSettings.moduleName);
+			}
 		}
 		break;
 		default:
@@ -438,13 +469,14 @@ void wifi_init_sta(void) {
 
 	ESP_ERROR_CHECK(esp_netif_init());
 
-	if (!DNSoff)
-		initialiseMdns(userSettings.moduleName);
+
 
 	//	ESP_ERROR_CHECK(esp_event_loop_create_default());  in main
 	s_sta_netif = esp_netif_create_default_wifi_sta();
 	if (DHCPoff)
 		setStaticIp((esp_netif_t *)s_sta_netif);
+
+	esp_netif_set_hostname(s_sta_netif, userSettings.moduleName);
 
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -510,5 +542,7 @@ void wifi_stop(void) {
 
 void wifiConnect(void) {
 	wifi_init_sta();
-	g_pCGIs = CGIurls; // for file_server to read CGIurls
+//	g_pCGIs = CGIurls; // for file_server to read CGIurls
 }
+
+

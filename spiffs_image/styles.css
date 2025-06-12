@@ -1,135 +1,140 @@
 .align-items-center {
-    background-color: #776fac;
-    padding: 5px;
-    height: 250px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .align-items-center > div {
-    background-color: aliceblue;
-    margin: 5px;
-    width: 400px;
-    line-height: 80px;
-    text-align: center;
-    font-size: 18px;
-  }
-BODY
-{
-   font-family: Arial;
-   background-color: white;
-   margin: 10px;
-   padding: 0px
+  background-color: #776fac;
+  padding: 5px;
+  height: 250px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
-BODY.side
-{
-   font-family: Arial;
-   background-color: white;
-   margin: 10px;
-   padding: 0px
+.align-items-center>div {
+  background-color: aliceblue;
+  margin: 5px;
+  width: 400px;
+  line-height: 80px;
+  text-align: center;
+  font-size: 18px;
 }
 
-H1
-{
-   background-color: oldlace;
-   color: black;
-   height: 50;
-   font-weight: normal;
-   font-family: Arial;
-   font-size: 30pt;
-   text-decoration:none;
-   text-align: left;
+BODY {
+  font-family: Arial;
+  background-color: white;
+  margin: 10px;
+  padding: 0px
+}
+
+BODY.side {
+  font-family: Arial;
+  background-color: white;
+  margin: 10px;
+  padding: 0px
+}
+
+H1 {
+  background-color: oldlace;
+  color: black;
+  height: 50;
+  font-weight: normal;
+  font-family: Arial;
+  font-size: 30pt;
+  text-decoration: none;
+  text-align: left;
 }
 
 p {
-     margin-bottom: 1.5cm;
+  margin-bottom: 1.5cm;
 }
 
 
 input {
-    width: 300pt;
-    font-size: 50pt;
+  width: 300pt;
+  font-size: 50pt;
 }
+
 link {
-    font-size: 25pt;
+  font-size: 25pt;
 }
 
-a {font-size: 50pt}
-
-h2  {
-	font-size: 20pt;
+a {
+  font-size: 50pt
 }
+
+h2 {
+  font-size: 20pt;
+}
+
 label {
-	width: 100pt;
-    font-size: 30pt;
+  width: 100pt;
+  font-size: 30pt;
 }
 
-input[type=checkbox]
-{
+input[type=checkbox] {
   /* Double-sized Checkboxes */
-  -ms-transform: scale(3); /* IE */
-  -moz-transform: scale(3); /* FF */
-  -webkit-transform: scale(3); /* Safari and Chrome */
-  -o-transform: scale(3); /* Opera */
+  -ms-transform: scale(3);
+  /* IE */
+  -moz-transform: scale(3);
+  /* FF */
+  -webkit-transform: scale(3);
+  /* Safari and Chrome */
+  -o-transform: scale(3);
+  /* Opera */
   width: 70px;
   margin-bottom: 30px;
 }
 
-input[type=radio]
-{
-height: 20px;		
+input[type=radio] {
+  height: 20px;
   width: 90px;
   margin-bottom: 50px;
 }
 
 
 /* Might want to wrap a span around your checkbox text */
-.checkboxtext
-{
+.checkboxtext {
   /* Checkbox text */
   font-size: 30pt;
   display: inline;
-  
+
 }
 
 input[type=radio] {
   transform: scale(2.5);
   text-transform: scale(2.5);
- }
+}
 
 input[type=number] {
-   font-size: 30pt;
-   width: 200pt;
-   border: 2px solid #555;
- }
+  font-size: 30pt;
+  width: 200pt;
+  border: 2px solid #555;
+}
 
 input[type=text] {
-   font-size: 30pt;
-   width: 200pt;
-   border: 2px solid #555;
- }
+  font-size: 30pt;
+  width: 200pt;
+  border: 2px solid #555;
+}
 
 
 table {
-/*   width: 100%; */
+  /*   width: 100%; */
   border-collapse: collapse;
   font-size: 35pt;
   margin: 40px 20px;
-  td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 28px;
+
+  td,
+  th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 28px;
+  }
+
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+
 }
 
-tr:nth-child(even) {
-  background-color: #dddddd;
-}
-
-}
-
-th.name  {
+th.name {
   width: 30%
 }
 
@@ -138,7 +143,7 @@ th.value {
 }
 
 th.valueLong {
-	 width: 50%;
+  width: 50%;
 }
 
 td {
@@ -166,15 +171,15 @@ td {
 /* CSS */
 .button-3 {
   appearance: none;
-  background-color: #2ea44f; 
+  background-color: #2ea44f;
   border: 2px solid rgba(27, 31, 35, .15);
   border-radius: 6px;
   box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
   box-sizing: border-box;
-  color: #fff; 
+  color: #fff;
   cursor: pointer;
   display: inline-block;
-  font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+  font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   font-size: 30px;
   font-weight: 600;
   line-height: 40px;
@@ -187,7 +192,7 @@ td {
   touch-action: manipulation;
   vertical-align: middle;
   white-space: nowrap;
-  margin:5px;
+  margin: 5px;
 }
 
 .button-3:focus:not(:focus-visible):not(.focus-visible) {
@@ -202,6 +207,7 @@ td {
 .button-3 .red {
   background-color: red;
 }
+
 .button-3 .cyan {
   background-color: Cyan;
 }
@@ -225,50 +231,61 @@ td {
 }
 
 
-.buttonGreen {background-color: #4CAF50;} /* Green */
-.buttonBlue {background-color: #008CBA;} /* Blue */
+.buttonGreen {
+  background-color: #4CAF50;
+}
+
+/* Green */
+.buttonBlue {
+  background-color: #008CBA;
+}
+
+/* Blue */
 
 .styled-table {
   table-layout: auto;
-   // width: 100%;
-    width: 450;
-    border-collapse: separate;
-    border: 2px solid #555;
-    margin: 5px 0;
-    font-size: 3.1em;  // 2.1
-    font-family: sans-serif;
-    min-width: 100px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  // width: 100%;
+  width: 450;
+  border-collapse: separate;
+  border: 2px solid #555;
+  margin: 5px 0;
+  font-size: 3.1em;
+  font-family: sans-serif;
+  min-width: 400px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
 }
+
 .styled-table thead tr {
-    background-color: #009879;
-    color: #ffffff;
-    text-align: left;
+  background-color: #009879;
+  color: #ffffff;
+  text-align: center;
 }
-.styled-table th
-{
-    padding: 20px 50px;
-/*    text-align:left;*/
-	margin: 5px 0;
-	width: 140px;
+
+.styled-table th {
+  padding: 20px 50px;
+  text-align: center;
+  margin: 5px 0;
+  width: 240px;
 }
 
 .styled-table td {
-    padding: 20px 50px;
-    text-align:center;
-    margin: 15px 0;
+  padding: 10px 10px;
+  text-align: center;
+  margin: 15px 0;
+  min-width: 240px;
 }
 
 .styled-table tbody tr {
-    border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
 }
 
 .styled-table tbody tr:nth-of-type(even) {
-    background-color: #f3f3f3;
+  background-color: #f3f3f3;
 }
 
 .styled-table tbody tr:last-of-type {
-    border-bottom: 2px solid #009879;
+  border-bottom: 2px solid #009879;
 }
 
 .container {
@@ -277,6 +294,7 @@ td {
   height: 100vh;
   display: flex;
 }
+
 .container .btn-holder {
   justify-content: flex-end;
   display: flex;

@@ -84,17 +84,17 @@ void sensirionTask(void *pvParameter) {
 	char str[50];
 
 	int sensirionTimeoutTimer = SCD30_TIMEOUT;
-
-	time(&now);
-
 	ESP_LOGI(TAG, "Starting SCD30 task on I2C port %d", I2CmasterPort);
-
 
 	while ((airSensor.begin(I2CmasterPort, false, false) != ESP_OK) && (sensirionTimeoutTimer-- > 0)) {
 		airSensor.reset();
-
+		sensirionError = true;
 		ESP_LOGE(TAG, "Air sensor not detected");
-		vTaskDelay(200 / portTICK_PERIOD_MS);
+		
+		int rssi = getRssi();
+		sprintf(str, "%s,-999,-999,-999,%d", userSettings.moduleName, rssi);
+		UDPsendMssg(UDPTXPORT, str, strlen(str));
+		vTaskDelay(5000 / portTICK_PERIOD_MS);
 	}
 
 	while (initSCD30() != ESP_OK) {

@@ -23,7 +23,8 @@ var MAXPOINTS = LOGDAYS * 24 * 60 / MINUTESPERTICK;
 
 var SIMULATE = false;
 
-var displayNames = ["", "CO2", "temperatuur", "vochtigheid"];
+var displayNames = ["", "CO2", "temperatuur", "RH"];
+var unit = ["", " ppm"," °C", " %" ];
 var dayNames = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
 
 var CO2Options = {
@@ -183,7 +184,7 @@ function timer() {
 							var value = parseFloat(arr[m]); // from string to float
 							if (value < -100)
 								arr[m] = "--";
-							document.getElementById(displayNames[m]).innerHTML = arr[m];
+							document.getElementById(displayNames[m]).innerHTML = arr[m] + unit[m];
 						}
 						var sampleTime = Date.now();
 						plot(CO2Data, 1, arr[1], sampleTime);
@@ -207,5 +208,18 @@ function timer() {
 	}
 }
 
+function clearChart() {
+	tempAndRHdata.removeRows(0, tempAndRHdata.getNumberOfRows());
+	CO2Data.removeRows(0, CO2Data.getNumberOfRows());	
+	chart.draw(tempAndRHdata, tempAndRHoptions);
+	chart.draw(CO2Data, CO2Options);
+}
+
+
+function clearLog() {
+	sendItem("clearLog");
+	clearChart();
+
+}
 
 

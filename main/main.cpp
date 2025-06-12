@@ -176,14 +176,8 @@ extern "C" void app_main() {
 		if (lastSecond != timeinfo.tm_sec) {
 			lastSecond = timeinfo.tm_sec; // every second
 			timeStamp++;
+			if ( timeStamp == 0)
+				timeStamp++;
 		}
-
-		// if (rssi < -80) {
-		// 	ESP_LOGI(TAG, "Signal strength is weak, consider moving closer to the access point.");
-		// } else if (rssi < -60) {
-		// 	ESP_LOGI(TAG, "Signal strength is moderate.");
-		// } else {
-		// 	ESP_LOGI(TAG, "Signal strength is strong.");
-		// }
 	}
 }
