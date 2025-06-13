@@ -90,7 +90,7 @@ void sensirionTask(void *pvParameter) {
 		airSensor.reset();
 		sensirionError = true;
 		ESP_LOGE(TAG, "Air sensor not detected");
-		
+
 		int rssi = getRssi();
 		sprintf(str, "%s,-999,-999,-999,%d", userSettings.moduleName, rssi);
 		UDPsendMssg(UDPTXPORT, str, strlen(str));
@@ -128,27 +128,29 @@ void sensirionTask(void *pvParameter) {
 		}
 		if (airSensor.readMeasurement() == ESP_OK) {
 			sensirionTimeoutTimer = SCD30_TIMEOUT;
-		
+
 			lastVal.co2 = airSensor.getCO2();
 			lastVal.temperature = airSensor.getTemperature() - userSettings.temperatureOffset;
 			lastVal.hum = airSensor.getHumidity();
 
-			if (lastVal.co2 > 400) { // first measurement invalid, reject
-				lastVal.timeStamp = timeStamp;
-			}
 			int rssi = getRssi();
 			sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d", userSettings.moduleName, lastVal.co2, lastVal.temperature, lastVal.hum, rssi);
 			UDPsendMssg(UDPTXPORT, str, strlen(str));
 			ESP_LOGI(TAG, "%s", str);
+			sprintf(str, "1:%2.0f", lastVal.co2);
+			UDPsendMssg(OLDUDPTXPORT, str, strlen(str));
 
 #ifdef TURBO_MODE
 			addToLog(lastVal); // add to cyclic log buffer
 #else
-			time(&now);
-			localtime_r(&now, &timeinfo);
-			if (lastminute != timeinfo.tm_min) {
-				addToLog(lastVal);			  // add to cyclic log buffer
-				lastminute = timeinfo.tm_min; // every minute
+			if (lastVal.co2 > 400) { // first measurement invalid, reject
+				lastVal.timeStamp = timeStamp;
+				time(&now);
+				localtime_r(&now, &timeinfo);
+				if (lastminute != timeinfo.tm_min) {
+					addToLog(lastVal);			  // add to cyclic log buffer
+					lastminute = timeinfo.tm_min; // every minute
+				}
 			}
 #endif
 		}
@@ -260,7 +262,6 @@ const CGIdesc_t calibrateDescriptors[] = {
 	{"temperatuur", &calValues.temperature, FLT, 1},
 	{"CO2", &calValues.CO2, FLT, 1},
 };
-
 
 void parseCGIWriteData(char *buf, int received) {
 

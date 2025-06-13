@@ -211,8 +211,8 @@ function timer() {
 function clearChart() {
 	tempAndRHdata.removeRows(0, tempAndRHdata.getNumberOfRows());
 	CO2Data.removeRows(0, CO2Data.getNumberOfRows());	
-	chart.draw(tempAndRHdata, tempAndRHoptions);
-	chart.draw(CO2Data, CO2Options);
+	tRHchart.draw(tempAndRHdata, tempAndRHoptions);
+	CO2chart.draw(CO2Data, CO2Options);
 }
 
 

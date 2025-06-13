@@ -10,12 +10,12 @@
 
 #include "cgiScripts.h"
 
-#define TURBO_MODE				// use turbo mode for faster measurements
+//#define TURBO_MODE				// use turbo mode for faster measurements
 
 #ifdef TURBO_MODE
 #define MEASINTERVAL			 	2 // TEST  20  // interval for sensiron sensor in seconds
 #else
-#define MEASINTERVAL			 	20 // interval for sensiron sensor in seconds
+#define MEASINTERVAL			 	10 // interval for sensiron sensor in seconds
 #endif
 
 #define LOGINTERVAL					60

@@ -19,11 +19,12 @@ handles wifi connect process
 #include "lwip/sys.h"
 #include "mdns.h"
 #include "settings.h"
+#include "CGItable.h"
 
 #include "esp_smartconfig.h"
 #include "wifiConnect.h"
 #ifndef CONFIG_FIXED_LAST_IP_DIGIT
-#define CONFIG_FIXED_LAST_IP_DIGIT 97 // ip will be xx.xx.xx.pp    xx from DHCP  , <= 0 disables this
+#define CONFIG_FIXED_LAST_IP_DIGIT 99 // ip will be xx.xx.xx.pp    xx from DHCP  , <= 0 disables this
 #endif
 
 /*set wps mode via project configuration */
@@ -542,7 +543,7 @@ void wifi_stop(void) {
 
 void wifiConnect(void) {
 	wifi_init_sta();
-//	g_pCGIs = CGIurls; // for file_server to read CGIurls
+	g_pCGIs = CGIurls; // for file_server to read CGIurls
 }
 
 
