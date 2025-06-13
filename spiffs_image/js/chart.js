@@ -24,7 +24,7 @@ var MAXPOINTS = LOGDAYS * 24 * 60 / MINUTESPERTICK;
 var SIMULATE = false;
 
 var displayNames = ["", "CO2", "temperatuur", "RH"];
-var unit = ["", " ppm"," °C", " %" ];
+var unit = ["", " ppm", " °C", " %"];
 var dayNames = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
 
 var CO2Options = {
@@ -172,37 +172,36 @@ function timer() {
 		presc--;
 		if (presc == 0) {
 			presc = 10; // 10 seconds  interval
-
-			str = getItem("getRTMeasValues");
-			arr = str.split(",");
-			// print RT values 
-			if (arr.length >= 3) {
-				if (arr[0] > 0) {
-					if (arr[0] != lastTimeStamp) {
-						lastTimeStamp = arr[0];
-						for (var m = 1; m < 4; m++) { // time not used for now 
-							var value = parseFloat(arr[m]); // from string to float
-							if (value < -100)
-								arr[m] = "--";
-							document.getElementById(displayNames[m]).innerHTML = arr[m] + unit[m];
-						}
-						var sampleTime = Date.now();
-						plot(CO2Data, 1, arr[1], sampleTime);
-						plot(tempAndRHdata, 1, arr[2], sampleTime);
-						plot(tempAndRHdata, 2, arr[3], sampleTime);
-						tRHchart.draw(tempAndRHdata, tempAndRHoptions);
-						CO2chart.draw(CO2Data, CO2Options);
-					}
-				}
-			}
-
 			if (firstRequest) {
 				arr = getItem("getLogMeasValues");
 				tempAndRHdata.removeRows(0, tempAndRHdata.getNumberOfRows());
 				CO2Data.removeRows(0, CO2Data.getNumberOfRows());
 				plotArray(arr);
 				firstRequest = false;
-				setInterval(function () { timer() }, 10000);
+			}
+			else {
+				str = getItem("getRTMeasValues");
+				arr = str.split(",");
+				// print RT values 
+				if (arr.length >= 3) {
+					if (arr[0] > 0) {
+						if (arr[0] != lastTimeStamp) {
+							lastTimeStamp = arr[0];
+							for (var m = 1; m < 4; m++) { // time not used for now 
+								var value = parseFloat(arr[m]); // from string to float
+								if (value < -100)
+									arr[m] = "--";
+								document.getElementById(displayNames[m]).innerHTML = arr[m] + unit[m];
+							}
+							var sampleTime = Date.now();
+							plot(CO2Data, 1, arr[1], sampleTime);
+							plot(tempAndRHdata, 1, arr[2], sampleTime);
+							plot(tempAndRHdata, 2, arr[3], sampleTime);
+							tRHchart.draw(tempAndRHdata, tempAndRHoptions);
+							CO2chart.draw(CO2Data, CO2Options);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -210,7 +209,7 @@ function timer() {
 
 function clearChart() {
 	tempAndRHdata.removeRows(0, tempAndRHdata.getNumberOfRows());
-	CO2Data.removeRows(0, CO2Data.getNumberOfRows());	
+	CO2Data.removeRows(0, CO2Data.getNumberOfRows());
 	tRHchart.draw(tempAndRHdata, tempAndRHoptions);
 	CO2chart.draw(CO2Data, CO2Options);
 }
