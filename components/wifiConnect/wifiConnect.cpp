@@ -14,17 +14,17 @@ handles wifi connect process
 #include "nvs_flash.h"
 #include <string.h>
 
+#include "CGItable.h"
 #include "lwip/err.h"
 #include "lwip/ip4_addr.h"
 #include "lwip/sys.h"
 #include "mdns.h"
 #include "settings.h"
-#include "CGItable.h"
 
 #include "esp_smartconfig.h"
 #include "wifiConnect.h"
 #ifndef CONFIG_FIXED_LAST_IP_DIGIT
-#define CONFIG_FIXED_LAST_IP_DIGIT 99 // ip will be xx.xx.xx.pp    xx from DHCP  , <= 0 disables this
+#define CONFIG_FIXED_LAST_IP_DIGIT 0 // ip will be xx.xx.xx.pp    xx from DHCP  , <= 0 disables this
 #endif
 
 /*set wps mode via project configuration */
@@ -74,7 +74,7 @@ wifiSettings_t wifiSettings;
 // CONFIG_EXAMPLE_WIFI_PASSWORD,ipaddr_addr(DEFAULT_IPADDRESS),ipaddr_addr(DEFAULT_GW),CONFIG_DEFAULT_FIRMWARE_UPGRADE_URL,CONFIG_FIRMWARE_UPGRADE_FILENAME,false
 // };
 wifiSettings_t wifiSettingsDefaults = {
-	CONFIG_EXAMPLE_WIFI_SSID, CONFIG_EXAMPLE_WIFI_PASSWORD, ipaddr_addr(DEFAULT_IPADDRESS), ipaddr_addr(DEFAULT_GW), " ", " ", false};
+	CONFIG_EXAMPLE_WIFI_SSID, CONFIG_EXAMPLE_WIFI_PASSWORD, ipaddr_addr(DEFAULT_IPADDRESS), ipaddr_addr(DEFAULT_GW), "xx", "yy", "zz", "0.0",  false};
 
 /* The examples use WiFi configuration that you can set via project configuration menu
 
@@ -137,13 +137,12 @@ int getRssi(void) {
 	} else {
 		ESP_LOGE(TAG, "Failed to get AP info");
 		return 0;
-	}	
+	}
 }
-
 
 static void setStaticIp(esp_netif_t *netif) {
 	if (esp_netif_dhcpc_stop(netif) != ESP_OK) {
-	//	ESP_LOGE(TAG, "Failed to stop dhcp client");
+		//	ESP_LOGE(TAG, "Failed to stop dhcp client");
 	}
 	esp_netif_ip_info_t ip;
 	memset(&ip, 0, sizeof(esp_netif_ip_info_t));
@@ -318,12 +317,13 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 		case WIFI_EVENT_STA_WPS_ER_TIMEOUT:
 			ESP_LOGI(TAG, "WIFI_EVENT_STA_WPS_ER_TIMEOUT");
 			ESP_ERROR_CHECK(esp_wifi_wps_disable());
-			connectStatus = CONNECTING;
-			s_retry_num = 0;
-			esp_wifi_connect();
-			if (wpsTimer != NULL) {
-				xTimerDelete(wpsTimer, 0);
-				wpsTimer = NULL;
+			if (connectStatus == CONNECTING) {
+				s_retry_num = 0;
+				esp_wifi_connect();
+				if (wpsTimer != NULL) {
+					xTimerDelete(wpsTimer, 0);
+					wpsTimer = NULL;
+				}
 			}
 			break;
 		case WIFI_EVENT_STA_WPS_ER_PIN: {
@@ -367,19 +367,18 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 			}
 
 #endif
-			if( CONFIG_FIXED_LAST_IP_DIGIT > 0) { // check if the last digit of IP address = CONFIG_FIXED_LAST_IP_DIGIT
+			if (CONFIG_FIXED_LAST_IP_DIGIT > 0) { // check if the last digit of IP address = CONFIG_FIXED_LAST_IP_DIGIT
 				uint32_t addr = event->ip_info.ip.addr;
-				
-				if ( (addr & 0xFF000000) == (CONFIG_FIXED_LAST_IP_DIGIT << 24) ) {  // last ip digit(LSB) is MSB in addr 
-					xEventGroupSetBits(s_wifi_event_group, CONNECTED_BIT); // ok
+
+				if ((addr & 0xFF000000) == (CONFIG_FIXED_LAST_IP_DIGIT << 24)) { // last ip digit(LSB) is MSB in addr
+					xEventGroupSetBits(s_wifi_event_group, CONNECTED_BIT);		 // ok
 					connectStatus = IP_RECEIVED;
-				}
-				else {
-					wifiSettings.ip4Address = (esp_ip4_addr_t)( (addr & 0x00FFFFFF) + (CONFIG_FIXED_LAST_IP_DIGIT << 24));
+				} else {
+					wifiSettings.ip4Address = (esp_ip4_addr_t)((addr & 0x00FFFFFF) + (CONFIG_FIXED_LAST_IP_DIGIT << 24));
 					sprintf(myIpAddress, IPSTR, IP2STR(&wifiSettings.ip4Address));
 					saveSettings();
 					ESP_LOGI(TAG, "Set static IP to %s , reconnecting", (myIpAddress));
-					setStaticIp( s_sta_netif);
+					setStaticIp(s_sta_netif);
 					esp_wifi_disconnect();
 					esp_wifi_connect();
 					if (!DNSoff)
@@ -393,8 +392,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 				if (!DNSoff)
 					initialiseMdns(userSettings.moduleName);
 			}
-		}
-		break;
+		} break;
 		default:
 			break;
 		}
@@ -470,8 +468,6 @@ void wifi_init_sta(void) {
 
 	ESP_ERROR_CHECK(esp_netif_init());
 
-
-
 	//	ESP_ERROR_CHECK(esp_event_loop_create_default());  in main
 	s_sta_netif = esp_netif_create_default_wifi_sta();
 	if (DHCPoff)
@@ -545,5 +541,3 @@ void wifiConnect(void) {
 	wifi_init_sta();
 	g_pCGIs = CGIurls; // for file_server to read CGIurls
 }
-
-

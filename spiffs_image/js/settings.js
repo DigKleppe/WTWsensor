@@ -47,10 +47,9 @@ function makeNameTable(descriptorData) {
 			cell.appendChild(input);
 			row.appendChild(cell);
 
-		//	cell = document.createElement("td");
-		//	cell.setAttribute("nameItem", i);
-
-			var button = document.createElement("button");
+			cell = document.createElement("td");
+			cell.setAttribute("nameItem", i);
+			var button = document.createElement("button");  // name fixed
 			button.innerHTML = "Stel in";
 			button.className = "button-3";
 			cell.appendChild(button);
@@ -58,7 +57,6 @@ function makeNameTable(descriptorData) {
 
 			cell = document.createElement("td");
 			cell.setAttribute("nameItem", i);
-
 			cell.appendChild(button);
 			row.appendChild(cell);
 		}
@@ -69,7 +67,7 @@ function makeNameTable(descriptorData) {
 	const cells = document.querySelectorAll("td[nameItem]");
 	cells.forEach(cell => {
 		cell.addEventListener('click', function() { setNameFunction(cell.closest('tr').rowIndex, cell.cellIndex) });
-	});
+		});
 }
 
 function setNameFunction(row, coll) {
@@ -205,6 +203,10 @@ function cancel() {
 	getItem("cancelSettings");
 }
 
+function forgetWifi() {
+	sendItem("forgetWifi");
+}
+
 
 function setCalFunction(row, coll) {
 	console.log("Row index:" + row + " Collumn: " + coll);
@@ -245,19 +247,8 @@ function initSettings() {
 
 	}
 	readCalInfo();
-	str = getItem("getSensorName");
-	makeNameTable(str);
-
-	// var rbutton = document.getElementById("c1");
-	// rbutton.checked = true;
-	// testCurrent = rbutton.value;
-
-	// rbutton.addEventListener("click", setCurrentLo);
-	// rbutton = document.getElementById("c2");
-	// rbutton.addEventListener("click", setCurrentMed);
-	// rbutton = document.getElementById("c3");
-	// rbutton.addEventListener("click", setCurrentHi);
-
+//	str = getItem("getSensorName");
+//	makeNameTable(str);
 	setInterval(function() { settingsTimer() }, 1000);
 }
 

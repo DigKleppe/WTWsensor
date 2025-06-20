@@ -35,7 +35,7 @@ static SCD30 airSensor;
 static bool calvaluesReceived;
 
 float getTemperature(void) { return lastVal.temperature; }
-extern bool connected;
+const char * getFirmWareVersion ();
 
 bool sensirionError;
 
@@ -200,11 +200,17 @@ int getInfoValuesScript(char *pBuffer, int count) {
 	case 0:
 		scriptState++;
 		len = sprintf(pBuffer, "%s\n", "Naam,Waarde");
+		len += sprintf(pBuffer + len, "%s,%s\n", "Sensornaam", userSettings.moduleName);
 		len += sprintf(pBuffer + len, "%s,%3.0f\n", "CO2", lastVal.co2);
 		len += sprintf(pBuffer + len, "%s,%3.2f\n", "temperatuur", lastVal.temperature);
 		len += sprintf(pBuffer + len, "%s,%3.0f\n", "Vochtigheid", lastVal.hum);
-		len += sprintf(pBuffer + len, "%s,%1.2f\n", "temperatuur offset", userSettings.temperatureOffset);
+		return len;
+	case 1:
+		scriptState++;
+		len = sprintf(pBuffer + len, "%s,%1.2f\n", "temperatuur offset", userSettings.temperatureOffset);
 		len += sprintf(pBuffer + len, "%s,%d\n", "RSSI", getRssi());
+		len += sprintf(pBuffer + len, "%s,%s\n", "firmwareversie", getFirmWareVersion());
+		len += sprintf(pBuffer + len, "%s,%s\n", "SPIFFS versie", wifiSettings.SPIFFSversion);
 		return len;
 		break;
 	default:
@@ -235,7 +241,8 @@ int getSensorNameScript(char *pBuffer, int count) {
 	switch (scriptState) {
 	case 0:
 		scriptState++;
-		len = sprintf(pBuffer, "Actueel,Nieuw\n");
+	//	len = sprintf(pBuffer, "Actueel,Nieuw\n");
+		len = sprintf(pBuffer, "Sensor naam\n");
 		len += sprintf(pBuffer + len, "%s\n", userSettings.moduleName);
 		return len;
 		break;
@@ -267,10 +274,19 @@ void parseCGIWriteData(char *buf, int received) {
 
 	bool save = false;
 
-	if (sscanf(buf, "setName:moduleName=%s", userSettings.moduleName) == 1) {
-		ESP_LOGI(TAG, "Hostname set to %s", userSettings.moduleName);
-		save = true;
-	}
+	// if (sscanf(buf, "setName:moduleName=%s", userSettings.moduleName) == 1) {
+	//  	ESP_LOGI(TAG, "Hostname set to %s", userSettings.moduleName);
+	//  	save = true;
+	// }
+
+	if (strncmp( buf, "forgetWifi", 10)  == 0) {
+	  	ESP_LOGI(TAG, "Wifisettings erased");
+		strcpy ( wifiSettings.SSID, "xx");
+		strcpy ( wifiSettings.pwd, "xx");
+	  	saveSettings();
+		esp_restart();
+	 }
+
 
 	if (strncmp(buf, "setCal:", 7) == 0) { // calvalues are written , in sensirionTasks write these to SCD30
 		if (readActionScript(&buf[7], calibrateDescriptors, NR_CALDESCRIPTORS)) {

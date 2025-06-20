@@ -11,7 +11,6 @@
 #include "log.h"
 #include "sensirionTask.h"
 
-
 // @formatter:off
 // do not alter
 const tCGI CGIurls[] = {

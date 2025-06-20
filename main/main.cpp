@@ -28,8 +28,13 @@
 
 #define LED_TYPE LED_STRIP_WS2812
 #define LED_GPIO GPIO_NUM_4 //  GPIO_NUM_48
-#define CONFIG_LED_STRIP_LEN 1
+#define CONFIG_LED_STRIP_LEN 1                                                                                               	
 
+const char firmWareVersion[] = { "0.0"};
+
+const char * getFirmWareVersion () {
+	return firmWareVersion;
+}
 esp_err_t init_spiffs(void);
 
 uint32_t timeStamp = 1; // global timestamp for logging
@@ -139,10 +144,19 @@ void LEDtask(void *pvParameters) {
 
 extern "C" void app_main() {
 	time_t now = 0;
+	esp_err_t err;
 	struct tm timeinfo;
 	int lastSecond = -1;
+	char moduleName[8]; // overruled modulename
+// jumpers
+	ESP_ERROR_CHECK( gpio_input_enable(GPIO_NUM_25)); 
+	ESP_ERROR_CHECK(gpio_input_enable(GPIO_NUM_26));
+	ESP_ERROR_CHECK(gpio_input_enable(GPIO_NUM_27)); 
+	ESP_ERROR_CHECK(gpio_pullup_en(GPIO_NUM_25));
+	ESP_ERROR_CHECK(gpio_pullup_en(GPIO_NUM_26));
+	ESP_ERROR_CHECK(gpio_pullup_en(GPIO_NUM_27));
 
-	esp_err_t err = nvs_flash_init();
+	err = nvs_flash_init();
 	if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_ERROR_CHECK(nvs_flash_erase());
 		err = nvs_flash_init();
@@ -158,7 +172,16 @@ extern "C" void app_main() {
 	}
 
 	err = loadSettings();
-
+	vTaskDelay(10);
+	int n = 1;
+	if (gpio_get_level (GPIO_NUM_25) == 0) 
+		n+= 1;
+	if (gpio_get_level (GPIO_NUM_26)== 0) 
+		n+= 2;
+	
+	sprintf (userSettings.moduleName, "S%d", n );  // make modulenname "S1 .. S4"
+	ESP_LOGI(TAG, "moduleName:%s" , userSettings.moduleName);
+	
 	wifiConnect();
 
 	i2c_master_init();
