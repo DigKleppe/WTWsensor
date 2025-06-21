@@ -25,7 +25,7 @@ extern "C" {
 
 typedef struct {
 	char SSID[33];
-	char pwd[64];
+	char pwd[128];
 	esp_ip4_addr_t ip4Address;
 	esp_ip4_addr_t gw;
 	char upgradeServer[32] ; // eg www.github.com
@@ -48,8 +48,17 @@ extern char myIpAddress[];
 extern bool DHCPoff;
 extern bool DNSoff;
 extern bool fileServerOff;
-
-typedef enum { CONNECTING, CONNECTED, SMARTCONFIG_ACTIVE,WPS_ACTIVE_1, WPS_ACTIVE, IP_RECEIVED} connectStatus_t;
+typedef enum {
+	CONNECTING,
+	CONNECT_TIMEOUT,
+	CONNECTED,
+	SMARTCONFIG_ACTIVE,
+	WPS_ACTIVE,
+	WPS_SUCCESS,
+	WPS_FAILED,
+	WPS_TIMEOUT,
+	IP_RECEIVED
+} connectStatus_t;
 
 extern volatile  connectStatus_t connectStatus;
 
