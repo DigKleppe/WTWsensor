@@ -17,7 +17,7 @@
 
 
 #define MAX_STRLEN				 32
-#define USERSETTINGS_CHECKSTR 	 "test3"
+#define USERSETTINGS_CHECKSTR 	 "test4"
 
 typedef struct {
 	char moduleName[MAX_STRLEN+1];

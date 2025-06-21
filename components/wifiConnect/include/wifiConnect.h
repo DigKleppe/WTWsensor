@@ -14,9 +14,7 @@
 #include "sdkconfig.h"
 #include "esp_err.h"
 #include "esp_netif.h"
-#if CONFIG_EXAMPLE_CONNECT_ETHERNET
-#include "esp_eth.h"
-#endif
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +23,7 @@ extern "C" {
 
 typedef struct {
 	char SSID[33];
-	char pwd[128];
+	char pwd[65];
 	esp_ip4_addr_t ip4Address;
 	esp_ip4_addr_t gw;
 	char upgradeServer[32] ; // eg www.github.com
@@ -35,7 +33,6 @@ typedef struct {
 	char SPIFFSversion[MAX_STORAGEVERSIONSIZE];	// holding current spiffs version
 	bool updated;
 }wifiSettings_t;
-
 
 extern wifiSettings_t wifiSettings;
 extern wifiSettings_t wifiSettingsDefaults;
@@ -64,20 +61,6 @@ extern volatile  connectStatus_t connectStatus;
 
 void wifiConnect (void);
 
-
-/* Common functions for protocol examples, to establish Wi-Fi or Ethernet connection.
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
- */
-
-// protocol examples common.h
-
-
-
 #if !CONFIG_IDF_TARGET_LINUX
 #if CONFIG_EXAMPLE_CONNECT_WIFI
 #define EXAMPLE_NETIF_DESC_STA "netif_sta"
@@ -98,27 +81,6 @@ void wifiConnect (void);
 
 
 int getRssi(void);  
-
-/**
- * @brief Configure Wi-Fi or Ethernet, connect, wait for IP
- *
- * This all-in-one helper function is used in protocols examples to
- * reduce the amount of boilerplate in the example.
- *
- * It is not intended to be used in real world applications.
- * See examples under examples/wifi/getting_started/ and examples/ethernet/
- * for more complete Wi-Fi or Ethernet initialization code.
- *
- * Read "Establishing Wi-Fi or Ethernet Connection" section in
- * examples/protocols/README.md for more information about this function.
- *
- * @return ESP_OK on successful connection
- */
-//esp_err_t connect(void);
-
-/**
- * Counterpart to connect, de-initializes Wi-Fi or Ethernet
- */
 esp_err_t disconnect(void);
 
 /**
