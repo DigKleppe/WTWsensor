@@ -1,31 +1,40 @@
 menu "Firmware_Storage Upgrade Configuration"
      
+     config FIRMWARE_VERSION
+        string "firmware version"
+        default "0.0"
+        help
+        	software version of this firmware 
+                 
+     config DEFAULT_FIRMWARE_UPGRADE_SERVER
+        string "firmware upgrade server"
+        default "www.github.com"
+        help
+            URL of server which hosts the firmware/storage image.
+     
      config DEFAULT_FIRMWARE_UPGRADE_URL
         string "firmware upgrade url endpoint"
-        default "http://192.168.2.1:8070/"
+        default "https://digkleppe.github.io//OTAtemplate//"
         help
-            URL of server which hosts the firmware/storage
-            image.
+            URL of server which hosts the firmware/storage image.
      
      config FIRMWARE_UPGRADE_FILENAME
         string "firmware upgrade filename"
-        default "otaKlp.bin"
+        default "OTAtemplate.bin"
         help
-            filenamen of the upgrade image.      
-            
+            filename of the upgrade image.     
+      
+     config CHECK_FIRMWARWE_UPDATE_INTERVAL
+        int "interval for checking new firmware in hours"
+        default 24
+           
      config SPIFFS_UPGRADE_FILENAME
         string "storage upgrade filename"
         default "storage.bin"
         help
             filenamen of the upgrade image.
-            
-    config SPIFFS_INFO_FILENAME
-        string "storage info filename" 
-        default "storageVersion.txt"
-        help
-            file holding version of SPIFFS storage
-
-	 config OTA_RECV_TIMEOUT
+         
+    config OTA_RECV_TIMEOUT
         int "OTA Receive Timeout"
         default 5000
         help

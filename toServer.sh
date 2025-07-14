@@ -1,0 +1,1 @@
+scp  firmWareVersion.txt  build/WTWsensor.bin  storageVersion.txt  build/storage.bin root@digkleppe.nl:/home/firmware/WTW/sensor

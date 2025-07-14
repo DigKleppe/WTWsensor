@@ -21,15 +21,16 @@ extern "C" {
 #endif
 #define MAX_STORAGEVERSIONSIZE 16
 
+
 typedef struct {
 	char SSID[33];
-	char pwd[65];
+	char pwd[64];
 	esp_ip4_addr_t ip4Address;
 	esp_ip4_addr_t gw;
 	char upgradeServer[32] ; // eg www.github.com
 	char upgradeURL[128]; 	 // eg  https://digkleppe.github.io//OTAtemplate
 	char upgradeFileName[32]; // name of firmware
-//	char firmwareVersion[MAX_STORAGEVERSIONSIZE]; // holding current app version
+	char firmwareVersion[MAX_STORAGEVERSIONSIZE]; // holding current app version
 	char SPIFFSversion[MAX_STORAGEVERSIONSIZE];	// holding current spiffs version
 	bool updated;
 }wifiSettings_t;

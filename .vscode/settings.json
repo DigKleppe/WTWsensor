@@ -1,21 +1,26 @@
 {
-    "C_Cpp.intelliSenseEngine": "default",
-    "idf.espIdfPath": "/home/dig/esp/esp-idf-v5.4.1",
-    "idf.pythonInstallPath": "/usr/bin/python3",
-    "idf.openOcdConfigs": [
-        "interface/ftdi/esp32_devkitj_v1.cfg",
-        "target/esp32.cfg"
-    ],
-    "idf.port": "/dev/ttyUSB1",
-    "idf.toolsPath": "/home/dig/.espressif",
-    "idf.customExtraVars": {
-        "IDF_TARGET": "esp32"
-    },
-    "idf.flashType": "UART",
-    "files.associations": {
-        "cstdlib": "cpp",
-        "chrono": "cpp",
-        "text_encoding": "cpp",
-        "typeinfo": "cpp"
-    }
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.espIdfPath": "/home/dig/esp/esp-idf-v5.4.1",
+  "idf.pythonInstallPath": "/usr/bin/python3",
+  "idf.openOcdConfigs": [
+    "board/esp32-wrover-kit-3.3v.cfg"
+  ],
+  "idf.port": "/dev/ttyUSB1",
+  "idf.toolsPath": "/home/dig/.espressif",
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32"
+  },
+  "idf.flashType": "UART",
+  "files.associations": {
+    "cstdlib": "cpp",
+    "chrono": "cpp",
+    "text_encoding": "cpp",
+    "typeinfo": "cpp"
+  },
+  "clangd.path": "/home/dig/.espressif/tools/esp-clang/esp-18.1.2_20240912/esp-clang/bin/clangd",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=/home/dig/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc",
+    "--compile-commands-dir=/mnt/linuxData/projecten/WTW/software/WTWsensor/build"
+  ]
 }

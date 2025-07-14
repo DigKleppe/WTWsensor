@@ -3,16 +3,18 @@
 #include "driver/i2c.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <led_strip.h>
-#include <stdio.h>
+#include "updateTask.h"
+
 
 #include "sensirionTask.h"
 #include "settings.h"
 #include "wifiConnect.h"
 
 #include <stdbool.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <led_strip.h>
+#include <stdio.h>
 
 #define SDA_PIN 21 // 1			//21
 #define SCL_PIN 22 // 2 		// 22
@@ -28,7 +30,10 @@
 
 #define LED_TYPE LED_STRIP_WS2812
 #define LED_GPIO GPIO_NUM_4 //  GPIO_NUM_48
-#define CONFIG_LED_STRIP_LEN 1                                                                                               	
+#define CONFIG_LED_STRIP_LEN 1   
+
+extern const char server_root_cert_pem_start[] asm("_binary_ca_cert_pem_start");  // dummy, to pull in for linker
+const char * dummy;
 
 const char firmWareVersion[] = { "0.0"};
 
@@ -189,6 +194,8 @@ extern "C" void app_main() {
 
 	led_strip_install();
 	xTaskCreate(LEDtask, "LEDtask", configMINIMAL_STACK_SIZE * 5, NULL, 5, NULL);
+
+	xTaskCreate(&updateTask, "updateTask",2* 8192, NULL, 5, NULL);
 
 	while (1) {
 		//	int rssi = getRssi();
