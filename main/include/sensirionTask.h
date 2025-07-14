@@ -31,6 +31,7 @@ typedef struct {
 
 extern calValues_t calValues;
 extern bool sensirionError;
+extern int moduleNr;  // set by solderlink 
 extern const CGIdesc_t calibrateDescriptors[NR_CALDESCRIPTORS];
 
 float getTemperature (void);

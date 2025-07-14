@@ -90,7 +90,7 @@ int getNewLogsScript(char *pBuffer, int count) {
 }
 
 int clearLogScript(char *pBuffer, int count) {
-	if (scriptState == 0) { // find oldest value in cyclic logbuffer
+	if (scriptState == 0) { 
 		logRxIdx = 0;
 		logTxIdx = 0;
 		memset(&measLog, 0, sizeof( measLog));

@@ -215,11 +215,9 @@ function clearChart() {
 	CO2chart.draw(CO2Data, CO2Options);
 }
 
-
 function clearLog() {
-	sendItem("clearLog");
+	getItem("clearLog");
 	clearChart();
-
 }
 
 

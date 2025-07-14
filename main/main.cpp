@@ -34,8 +34,9 @@
 
 extern const char server_root_cert_pem_start[] asm("_binary_ca_cert_pem_start");  // dummy, to pull in for linker
 const char * dummy;
+int moduleNr;
 
-const char firmWareVersion[] = { "0.0"};
+const char firmWareVersion[] = { "0.2"};
 
 const char * getFirmWareVersion () {
 	return firmWareVersion;
@@ -186,6 +187,7 @@ extern "C" void app_main() {
 	
 	sprintf (userSettings.moduleName, "S%d", n );  // make modulenname "S1 .. S4"
 	ESP_LOGI(TAG, "moduleName:%s" , userSettings.moduleName);
+	moduleNr = n; 
 	
 	wifiConnect();
 

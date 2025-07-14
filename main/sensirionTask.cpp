@@ -159,7 +159,7 @@ void sensirionTask(void *pvParameter) {
 			//	sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d", userSettings.moduleName, lastVal.co2, lastVal.temperature, lastVal.hum, rssi);
 				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d", userSettings.moduleName, avgVal.co2, avgVal.temperature - userSettings.temperatureOffset,
 				 		avgVal.hum - userSettings.RHoffset, rssi);
-
+				vTaskDelay (moduleNr * 500/portTICK_PERIOD_MS); // prevent interaction with other sensors
 				UDPsendMssg(UDPTXPORT, str, strlen(str));
 				ESP_LOGI(TAG, "%s", str);
 				sprintf(str, "1:%2.0f", lastVal.co2);
