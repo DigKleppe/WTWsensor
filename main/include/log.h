@@ -21,10 +21,7 @@ typedef struct {
 	float co2;
 } log_t;
 
-static log_t tLog[MAXLOGVALUES];
-static log_t lastVal;
-static log_t rawlastVal;
-
+extern log_t tLog[MAXLOGVALUES];
 
 extern int logRxIdx;
 extern int logTxIdx;

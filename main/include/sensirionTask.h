@@ -20,18 +20,18 @@
 
 #define LOGINTERVAL					60
 
-#define NR_CALDESCRIPTORS 			3
+#define NR_CALDESCRIPTORS 			4
 #define NOCAL 						99999
 
 typedef struct {
 	float CO2;
 	float temperature;
+	float hum;
 } calValues_t;
 
 extern calValues_t calValues;
 extern bool sensirionError;
 extern const CGIdesc_t calibrateDescriptors[NR_CALDESCRIPTORS];
-
 
 float getTemperature (void);
 
