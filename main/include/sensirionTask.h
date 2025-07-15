@@ -20,6 +20,8 @@
 
 #define LOGINTERVAL					60
 
+#define AVERAGES 					30	
+
 #define NR_CALDESCRIPTORS 			4
 #define NOCAL 						99999
 

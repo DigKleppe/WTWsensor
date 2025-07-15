@@ -27,7 +27,7 @@
 #define MAXRETRIES 5
 #define SCD30_TIMEOUT 600
 
-#define AVERAGES 6
+
 // #define SIMULATE
 
 static const char *TAG = "sensirionTask";
