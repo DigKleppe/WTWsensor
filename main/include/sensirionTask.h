@@ -31,9 +31,20 @@ typedef struct {
 	float hum;
 } calValues_t;
 
+typedef struct {
+	float co2;
+	float temperature;
+	float hum;
+	int rssi;
+} sensorMssg_t;
+
+
 extern calValues_t calValues;
 extern bool sensirionError;
+extern bool calvaluesReceived;
 extern int moduleNr;  // set by solderlink 
+void getAvgMeasValues ( sensorMssg_t * dest);
+
 extern const CGIdesc_t calibrateDescriptors[NR_CALDESCRIPTORS];
 
 float getTemperature (void);

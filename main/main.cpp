@@ -5,7 +5,7 @@
 #include "nvs_flash.h"
 #include "updateTask.h"
 
-
+#include "autoCalTask.h"
 #include "sensirionTask.h"
 #include "settings.h"
 #include "wifiConnect.h"
@@ -198,6 +198,8 @@ extern "C" void app_main() {
 	xTaskCreate(LEDtask, "LEDtask", configMINIMAL_STACK_SIZE * 5, NULL, 5, NULL);
 
 	xTaskCreate(&updateTask, "updateTask",2* 8192, NULL, 5, NULL);
+
+	xTaskCreate(&autoCalTask, "autoCalTask",8192, NULL, 5, NULL);
 
 	while (1) {
 		//	int rssi = getRssi();

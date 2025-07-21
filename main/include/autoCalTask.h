@@ -1,0 +1,1 @@
+void autoCalTask(void *pvParameter);

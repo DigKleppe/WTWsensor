@@ -34,7 +34,7 @@ static const char *TAG = "sensirionTask";
 
 extern int scriptState;
 static SCD30 airSensor;
-static bool calvaluesReceived;
+bool calvaluesReceived;
 static log_t avgVal;  // avgeraged values
 static log_t lastVal;
 
@@ -157,7 +157,7 @@ void sensirionTask(void *pvParameter) {
 				int rssi = getRssi();
 				
 			//	sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d", userSettings.moduleName, lastVal.co2, lastVal.temperature, lastVal.hum, rssi);
-				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d", userSettings.moduleName, avgVal.co2, avgVal.temperature - userSettings.temperatureOffset,
+				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d\n\r", userSettings.moduleName, avgVal.co2, avgVal.temperature - userSettings.temperatureOffset,
 				 		avgVal.hum - userSettings.RHoffset, rssi);
 				vTaskDelay (moduleNr * 500/portTICK_PERIOD_MS); // prevent interaction with other sensors
 				UDPsendMssg(UDPTXPORT, str, strlen(str));
@@ -187,6 +187,12 @@ void sensirionTask(void *pvParameter) {
 	} // end while(1)
 } // end sensirionTask
 
+
+void getAvgMeasValues ( sensorMssg_t * dest) {
+	dest->co2 = avgVal.co2;
+	dest->hum = avgVal.hum;
+	dest->temperature = avgVal.temperature;
+}
 // CGI stuff
 
 int printLog(log_t *logToPrint, char *pBuffer) {
