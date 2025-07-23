@@ -25,7 +25,7 @@
 #define UDPTXPORT 5050
 #define OLDUDPTXPORT 5001
 #define MAXRETRIES 5
-#define SCD30_TIMEOUT 600
+#define SCD30_TIMEOUT 2500 // * 10ms
 
 
 // #define SIMULATE
@@ -38,6 +38,10 @@ bool calvaluesReceived;
 static log_t avgVal;  // avgeraged values
 static log_t lastVal;
 
+static int timeOuts;
+static int retriestotal;
+static int resets;
+
 Averager co2Averager;
 Averager tempAverager;
 Averager humAverager;
@@ -49,7 +53,7 @@ bool sensirionError;
 
 esp_err_t initSCD30(void) {
 	int retries = 0;
-	int retriestotal = 0;
+
 	retries = MAXRETRIES;
 	esp_err_t err;
 
@@ -90,7 +94,7 @@ void sensirionTask(void *pvParameter) {
 	struct tm timeinfo;
 	int lastminute = -1;
 
-	char str[50];
+	char str[80];
 
 	int sensirionTimeoutTimer = SCD30_TIMEOUT;
 	ESP_LOGI(TAG, "Starting SCD30 task on I2C port %d", I2CmasterPort);
@@ -101,6 +105,7 @@ void sensirionTask(void *pvParameter) {
 
 	while ((airSensor.begin(I2CmasterPort, false, false) != ESP_OK) && (sensirionTimeoutTimer-- > 0)) {
 		airSensor.reset();
+		resets++;
 		sensirionError = true;
 		ESP_LOGE(TAG, "Air sensor not detected");
 
@@ -120,13 +125,13 @@ void sensirionTask(void *pvParameter) {
 	sensirionTimeoutTimer = SCD30_TIMEOUT;
 	// testLog();
 	while (1) {
-		vTaskDelay(100 / portTICK_PERIOD_MS);
+		vTaskDelay(10 / portTICK_PERIOD_MS);
 
 		if (sensirionError)
 			sensirionTimeoutTimer = 1; //
 		if (sensirionTimeoutTimer-- == 0) {
 			ESP_LOGE(TAG, "Air sensor timeout");
-
+			resets++;
 			airSensor.reset();
 			if (initSCD30() != ESP_OK)
 				sensirionError = true;
@@ -157,8 +162,8 @@ void sensirionTask(void *pvParameter) {
 				int rssi = getRssi();
 				
 			//	sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d", userSettings.moduleName, lastVal.co2, lastVal.temperature, lastVal.hum, rssi);
-				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d\n\r", userSettings.moduleName, avgVal.co2, avgVal.temperature - userSettings.temperatureOffset,
-				 		avgVal.hum - userSettings.RHoffset, rssi);
+				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d,%lu\n\r", userSettings.moduleName, avgVal.co2, avgVal.temperature - userSettings.temperatureOffset,
+				 		avgVal.hum - userSettings.RHoffset, rssi,(unsigned long)  timeStamp);
 				vTaskDelay (moduleNr * 500/portTICK_PERIOD_MS); // prevent interaction with other sensors
 				UDPsendMssg(UDPTXPORT, str, strlen(str));
 				ESP_LOGI(TAG, "%s", str);
@@ -240,6 +245,15 @@ int getInfoValuesScript(char *pBuffer, int count) {
 		len += sprintf(pBuffer + len, "%s,%s\n", "SPIFFS versie", wifiSettings.SPIFFSversion);
 		return len;
 		break;
+	case 2:
+		scriptState++;
+		len = sprintf(pBuffer, "%s,%d\n", "timeouts", timeOuts);
+		len += sprintf(pBuffer + len, "%s,%d\n", "retriestotal", retriestotal);
+		len += sprintf(pBuffer + len, "%s,%d\n", "Sensor resets", resets);
+		len += sprintf(pBuffer + len, "%s,%lu\n", "timeStamp", (unsigned long) timeStamp);
+		return len;
+		break;
+		
 	default:
 		break;
 	}

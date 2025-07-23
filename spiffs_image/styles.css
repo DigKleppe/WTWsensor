@@ -266,14 +266,14 @@ td {
   padding: 20px 50px;
   text-align: center;
   margin: 5px 0;
-  width: 240px;
+  width: 320px;
 }
 
 .styled-table td {
   padding: 10px 10px;
   text-align: center;
   margin: 15px 0;
-  min-width: 240px;
+  min-width: 320px;
 }
 
 .styled-table tbody tr {
