@@ -93,7 +93,8 @@ void sensirionTask(void *pvParameter) {
 	time_t now = 0;
 	struct tm timeinfo;
 	int lastminute = -1;
-
+	bool mssgToSend = false;
+	int sendTime;
 	char str[80];
 
 	int sensirionTimeoutTimer = SCD30_TIMEOUT;
@@ -126,6 +127,8 @@ void sensirionTask(void *pvParameter) {
 	// testLog();
 	while (1) {
 		vTaskDelay(10 / portTICK_PERIOD_MS);
+		time(&now);
+		localtime_r(&now, &timeinfo);
 
 		if (sensirionError)
 			sensirionTimeoutTimer = 1; //
@@ -150,7 +153,7 @@ void sensirionTask(void *pvParameter) {
 			lastVal.co2 = airSensor.getCO2();
 			lastVal.temperature = airSensor.getTemperature(); //- userSettings.temperatureOffset;
 			lastVal.hum = airSensor.getHumidity();			  //-userSettings.CO2offset;
-			if (lastVal.co2 > 400) {						  // first measurement invalid, reject
+			if (lastVal.co2 > 350) {						  // first measurement invalid, reject
 				co2Averager.write(lastVal.co2 * 1000.0);
 				tempAverager.write(lastVal.temperature * 1000.0);
 				humAverager.write(lastVal.hum *1000.0);
@@ -160,28 +163,37 @@ void sensirionTask(void *pvParameter) {
 				avgVal.hum = humAverager.average()/1000.0;
 
 				int rssi = getRssi();
-				
-			//	sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d", userSettings.moduleName, lastVal.co2, lastVal.temperature, lastVal.hum, rssi);
 				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d,%lu\n\r", userSettings.moduleName, avgVal.co2, avgVal.temperature - userSettings.temperatureOffset,
 				 		avgVal.hum - userSettings.RHoffset, rssi,(unsigned long)  timeStamp);
-				vTaskDelay (moduleNr * 500/portTICK_PERIOD_MS); // prevent interaction with other sensors
-				UDPsendMssg(UDPTXPORT, str, strlen(str));
-				ESP_LOGI(TAG, "%s", str);
-				sprintf(str, "1:%2.0f", lastVal.co2);
-				UDPsendMssg(OLDUDPTXPORT, str, strlen(str));
+ 				sendTime = ((timeinfo.tm_sec /10) + 1  * 10 ) +  moduleNr + 1;  // timeslot 12 , 22 etc for module 1
+				if ( sendTime >= 59) 
+					sendTime -= 59;
+
+				mssgToSend = true;	
 			}
 			avgVal.timeStamp = timeStamp;
 #ifdef TURBO_MODE
 			addToLog(avgVal); // add to cyclic log buffer
 #else
-			time(&now);
-			localtime_r(&now, &timeinfo);
 			if (lastminute != timeinfo.tm_min) {
 				addToLog(avgVal);			  // add to cyclic log buffer
 				lastminute = timeinfo.tm_min; // every minute
 			}
 #endif
 		}
+		if (mssgToSend) {
+			if ( sendTime == timeinfo.tm_sec ) {  // send at 10, 20  for module 0 , 11, 21 for module 1  etc
+				UDPsendMssg(UDPTXPORT, str, strlen(str));
+				ESP_LOGI(TAG, "UDP send %s %d" , str, timeinfo.tm_sec);
+
+				sprintf(str, "1:%2.0f", lastVal.co2);
+				vTaskDelay( 10/portTICK_PERIOD_MS);
+				UDPsendMssg(OLDUDPTXPORT, str, strlen(str));
+				mssgToSend = false;
+				
+			}
+		}
+				
 		if (calvaluesReceived) {
 			calvaluesReceived = false;
 			if (calValues.CO2 != NOCAL) { // then real CO2 received

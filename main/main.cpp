@@ -9,6 +9,7 @@
 #include "sensirionTask.h"
 #include "settings.h"
 #include "wifiConnect.h"
+#include "clockTask.h"
 
 #include <stdbool.h>
 #include <freertos/FreeRTOS.h>
@@ -36,7 +37,7 @@ extern const char server_root_cert_pem_start[] asm("_binary_ca_cert_pem_start");
 const char * dummy;
 int moduleNr;
 
-const char firmWareVersion[] = { "0.5"}; // just for info , set this in firmWareVersion.txt for update
+const char firmWareVersion[] = { "0.6"}; // just for info , set this in firmWareVersion.txt for update
 
 const char * getFirmWareVersion () {
 	return firmWareVersion;
@@ -200,6 +201,12 @@ extern "C" void app_main() {
 	xTaskCreate(&updateTask, "updateTask",2* 8192, NULL, 5, NULL);
 
 	xTaskCreate(&autoCalTask, "autoCalTask",8192, NULL, 5, NULL);
+
+	do {
+		vTaskDelay(100);
+	} while (connectStatus != IP_RECEIVED);
+	
+	xTaskCreate(clockTask, "clock", 4 * 1024, NULL, 0, NULL);
 
 	while (1) {
 		//	int rssi = getRssi();
