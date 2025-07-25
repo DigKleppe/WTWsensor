@@ -27,7 +27,6 @@
 #define MAXRETRIES 5
 #define SCD30_TIMEOUT 2500 // * 10ms
 
-
 // #define SIMULATE
 
 static const char *TAG = "sensirionTask";
@@ -35,7 +34,7 @@ static const char *TAG = "sensirionTask";
 extern int scriptState;
 static SCD30 airSensor;
 bool calvaluesReceived;
-static log_t avgVal;  // avgeraged values
+static log_t avgVal; // avgeraged values
 static log_t lastVal;
 
 static int timeOuts;
@@ -87,14 +86,44 @@ esp_err_t initSCD30(void) {
 	return err;
 }
 
+// sends averaged values at  11,21,31 for module 1  12, 22 for module 2 etc
+ void updTransmitTask(void *pvParameter) {
+
+	time_t now;
+	struct tm timeinfo;
+	char str[80];
+	bool isSend = false;
+
+	while (connectStatus != IP_RECEIVED) {
+		vTaskDelay(100);
+	}
+
+	vTaskDelay(5000 / portTICK_PERIOD_MS); // wait to start for samples to collect
+
+	while (1) {
+		vTaskDelay(100 / portTICK_PERIOD_MS);
+		time(&now);
+		localtime_r(&now, &timeinfo);
+		if ((timeinfo.tm_sec % 10) == moduleNr) {
+			if (!isSend) {
+				isSend = true;
+				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d,%lu\n\r", userSettings.moduleName, avgVal.co2,
+						avgVal.temperature - userSettings.temperatureOffset, avgVal.hum - userSettings.RHoffset, getRssi(), (unsigned long)timeStamp);
+				UDPsendMssg(UDPTXPORT, str, strlen(str));
+				ESP_LOGI(TAG, "UDP send %s %d", str, timeinfo.tm_sec);
+			}
+		} else
+			isSend = false;
+	}
+}
+
 void sensirionTask(void *pvParameter) {
 	int dummy = (int)pvParameter;
 	i2c_port_t I2CmasterPort = (i2c_port_t)dummy;
 	time_t now = 0;
 	struct tm timeinfo;
 	int lastminute = -1;
-	bool mssgToSend = false;
-	int sendTime;
+
 	char str[80];
 
 	int sensirionTimeoutTimer = SCD30_TIMEOUT;
@@ -122,8 +151,9 @@ void sensirionTask(void *pvParameter) {
 		ESP_LOGE(TAG, "Error init Air sensor");
 	}
 	sensirionError = false;
-
 	sensirionTimeoutTimer = SCD30_TIMEOUT;
+
+	xTaskCreate(updTransmitTask, "udptx", 4 * 1024, NULL, 0, NULL);
 	// testLog();
 	while (1) {
 		vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -156,44 +186,22 @@ void sensirionTask(void *pvParameter) {
 			if (lastVal.co2 > 350) {						  // first measurement invalid, reject
 				co2Averager.write(lastVal.co2 * 1000.0);
 				tempAverager.write(lastVal.temperature * 1000.0);
-				humAverager.write(lastVal.hum *1000.0);
-
-				avgVal.co2 = co2Averager.average()/1000.0;
-				avgVal.temperature = tempAverager.average()/1000.0;
-				avgVal.hum = humAverager.average()/1000.0;
-
-				int rssi = getRssi();
-				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d,%lu\n\r", userSettings.moduleName, avgVal.co2, avgVal.temperature - userSettings.temperatureOffset,
-				 		avgVal.hum - userSettings.RHoffset, rssi,(unsigned long)  timeStamp);
- 				sendTime = ((timeinfo.tm_sec /10) + 1  * 10 ) +  moduleNr + 1;  // timeslot 12 , 22 etc for module 1
-				if ( sendTime >= 59) 
-					sendTime -= 59;
-
-				mssgToSend = true;	
+				humAverager.write(lastVal.hum * 1000.0);
 			}
-			avgVal.timeStamp = timeStamp;
+
 #ifdef TURBO_MODE
 			addToLog(avgVal); // add to cyclic log buffer
 #else
 			if (lastminute != timeinfo.tm_min) {
+				avgVal.co2 = co2Averager.average() / 1000.0;
+				avgVal.temperature = tempAverager.average() / 1000.0;
+				avgVal.hum = humAverager.average() / 1000.0;
+				avgVal.timeStamp = timeStamp;
 				addToLog(avgVal);			  // add to cyclic log buffer
 				lastminute = timeinfo.tm_min; // every minute
 			}
 #endif
 		}
-		if (mssgToSend) {
-			if ( sendTime == timeinfo.tm_sec ) {  // send at 10, 20  for module 0 , 11, 21 for module 1  etc
-				UDPsendMssg(UDPTXPORT, str, strlen(str));
-				ESP_LOGI(TAG, "UDP send %s %d" , str, timeinfo.tm_sec);
-
-				sprintf(str, "1:%2.0f", lastVal.co2);
-				vTaskDelay( 10/portTICK_PERIOD_MS);
-				UDPsendMssg(OLDUDPTXPORT, str, strlen(str));
-				mssgToSend = false;
-				
-			}
-		}
-				
 		if (calvaluesReceived) {
 			calvaluesReceived = false;
 			if (calValues.CO2 != NOCAL) { // then real CO2 received
@@ -204,8 +212,7 @@ void sensirionTask(void *pvParameter) {
 	} // end while(1)
 } // end sensirionTask
 
-
-void getAvgMeasValues ( sensorMssg_t * dest) {
+void getAvgMeasValues(sensorMssg_t *dest) {
 	dest->co2 = avgVal.co2;
 	dest->hum = avgVal.hum;
 	dest->temperature = avgVal.temperature;
@@ -217,7 +224,7 @@ int printLog(log_t *logToPrint, char *pBuffer) {
 	len = sprintf(pBuffer, "%lu,", logToPrint->timeStamp);
 	len += sprintf(pBuffer + len, "%3.0f,", logToPrint->co2);
 	len += sprintf(pBuffer + len, "%3.2f,", logToPrint->temperature - userSettings.temperatureOffset);
-	len += sprintf(pBuffer + len, "%3.2f\n", logToPrint->hum- userSettings.RHoffset);
+	len += sprintf(pBuffer + len, "%3.2f\n", logToPrint->hum - userSettings.RHoffset);
 	return len;
 }
 
@@ -245,8 +252,8 @@ int getInfoValuesScript(char *pBuffer, int count) {
 		len = sprintf(pBuffer, "%s\n", "Naam,Waarde");
 		len += sprintf(pBuffer + len, "%s,%s\n", "Sensornaam", userSettings.moduleName);
 		len += sprintf(pBuffer + len, "%s,%3.0f\n", "CO2", avgVal.co2);
-		len += sprintf(pBuffer + len, "%s,%3.2f\n", "temperatuur", avgVal.temperature-userSettings.temperatureOffset);
-		len += sprintf(pBuffer + len, "%s,%3.1f\n", "Vochtigheid", avgVal.hum-userSettings.RHoffset) ;
+		len += sprintf(pBuffer + len, "%s,%3.2f\n", "temperatuur", avgVal.temperature - userSettings.temperatureOffset);
+		len += sprintf(pBuffer + len, "%s,%3.1f\n", "Vochtigheid", avgVal.hum - userSettings.RHoffset);
 		return len;
 	case 1:
 		scriptState++;
@@ -262,10 +269,10 @@ int getInfoValuesScript(char *pBuffer, int count) {
 		len = sprintf(pBuffer, "%s,%d\n", "timeouts", timeOuts);
 		len += sprintf(pBuffer + len, "%s,%d\n", "retriestotal", retriestotal);
 		len += sprintf(pBuffer + len, "%s,%d\n", "Sensor resets", resets);
-		len += sprintf(pBuffer + len, "%s,%lu\n", "timeStamp", (unsigned long) timeStamp);
+		len += sprintf(pBuffer + len, "%s,%lu\n", "timeStamp", (unsigned long)timeStamp);
 		return len;
 		break;
-		
+
 	default:
 		break;
 	}
@@ -295,7 +302,7 @@ int getSensorNameScript(char *pBuffer, int count) {
 	case 0:
 		scriptState++;
 		//	len = sprintf(pBuffer, "Actueel,Nieuw\n");
-	//	len = sprintf(pBuffer, "Sensor naam\n");
+		//	len = sprintf(pBuffer, "Sensor naam\n");
 		len = sprintf(pBuffer, "%s\n", userSettings.moduleName);
 		return len;
 		break;
@@ -315,7 +322,7 @@ int cancelSettingsScript(char *pBuffer, int count) {
 	return 0;
 }
 
-calValues_t calValues = {NOCAL, NOCAL,NOCAL};
+calValues_t calValues = {NOCAL, NOCAL, NOCAL};
 
 const CGIdesc_t calibrateDescriptors[] = {
 	{"dummy", NULL, FLT, 1}, // ??
@@ -336,7 +343,7 @@ void parseCGIWriteData(char *buf, int received) {
 	}
 	if (strncmp(buf, "setCal:", 7) == 0) { // calvalues are written , in sensirionTasks write these to SCD30
 		if (readActionScript(&buf[7], calibrateDescriptors, NR_CALDESCRIPTORS)) {
-			calvaluesReceived = true;  //update CO2 synchronous above
+			calvaluesReceived = true; // update CO2 synchronous above
 
 			ESP_LOGI(TAG, "calvalues received: %f, %f, %f", calValues.CO2, calValues.temperature, calValues.hum);
 
