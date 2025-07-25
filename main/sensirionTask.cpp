@@ -110,7 +110,7 @@ esp_err_t initSCD30(void) {
 				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d,%lu\n\r", userSettings.moduleName, avgVal.co2,
 						avgVal.temperature - userSettings.temperatureOffset, avgVal.hum - userSettings.RHoffset, getRssi(), (unsigned long)timeStamp);
 				UDPsendMssg(UDPTXPORT, str, strlen(str));
-				ESP_LOGI(TAG, "UDP send %s %d", str, timeinfo.tm_sec);
+			//	ESP_LOGI(TAG, "UDP send %s %d", str, timeinfo.tm_sec);
 			}
 		} else
 			isSend = false;
