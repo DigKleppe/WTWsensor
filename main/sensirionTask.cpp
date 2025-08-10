@@ -87,7 +87,7 @@ esp_err_t initSCD30(void) {
 }
 
 // sends averaged values at  11,21,31 for module 1  12, 22 for module 2 etc
- void updTransmitTask(void *pvParameter) {
+void updTransmitTask(void *pvParameter) {
 
 	time_t now;
 	struct tm timeinfo;
@@ -110,7 +110,7 @@ esp_err_t initSCD30(void) {
 				sprintf(str, "%s,%2.0f,%2.2f,%3.1f,%d,%lu\n\r", userSettings.moduleName, avgVal.co2,
 						avgVal.temperature - userSettings.temperatureOffset, avgVal.hum - userSettings.RHoffset, getRssi(), (unsigned long)timeStamp);
 				UDPsendMssg(UDPTXPORT, str, strlen(str));
-			//	ESP_LOGI(TAG, "UDP send %s %d", str, timeinfo.tm_sec);
+				//	ESP_LOGI(TAG, "UDP send %s %d", str, timeinfo.tm_sec);
 			}
 		} else
 			isSend = false;
@@ -199,6 +199,10 @@ void sensirionTask(void *pvParameter) {
 				avgVal.timeStamp = timeStamp;
 				addToLog(avgVal);			  // add to cyclic log buffer
 				lastminute = timeinfo.tm_min; // every minute
+				if (avgVal.co2 < 405) {		  //
+					ESP_LOGI(TAG, "CO2 value too low, Calibrate");
+					airSensor.setForcedRecalibrationFactor(410);
+				}
 			}
 #endif
 		}
