@@ -68,15 +68,12 @@ static void setStaticIp(esp_netif_t *netif);
 esp_err_t saveSettings(void);
 
 
-#define EXAMPLE_ESP_WIFI_SSID "xxx"
-#define EXAMPLE_ESP_WIFI_PASS "yyy"
-
 wifiSettings_t wifiSettings;
 // wifiSettings_t wifiSettingsDefaults = { CONFIG_EXAMPLE_WIFI_SSID,
 // CONFIG_EXAMPLE_WIFI_PASSWORD,ipaddr_addr(DEFAULT_IPADDRESS),ipaddr_addr(DEFAULT_GW),CONFIG_DEFAULT_FIRMWARE_UPGRADE_URL,CONFIG_FIRMWARE_UPGRADE_FILENAME,false
 // };
 wifiSettings_t wifiSettingsDefaults = {
-	CONFIG_EXAMPLE_WIFI_SSID, CONFIG_EXAMPLE_WIFI_PASSWORD, ipaddr_addr(DEFAULT_IPADDRESS), ipaddr_addr(DEFAULT_GW), " ", " ", " ", "0.0", false};
+	"test", "Yellowstone", ipaddr_addr(DEFAULT_IPADDRESS), ipaddr_addr(DEFAULT_GW), " ", " ", " ", "0.0", false};
 
 /* The examples use WiFi configuration that you can set via project configuration menu
 
