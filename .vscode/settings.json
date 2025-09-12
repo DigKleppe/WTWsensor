@@ -1,6 +1,6 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
-  "idf.espIdfPath": "/home/dig/esp/esp-idf-v5.4.1",
+  "idf.espIdfPath": "/home/dig/esp/v5.5/esp-idf",
   "idf.pythonInstallPath": "/usr/bin/python3",
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"

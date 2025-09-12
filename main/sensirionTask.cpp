@@ -199,10 +199,12 @@ void sensirionTask(void *pvParameter) {
 				avgVal.timeStamp = timeStamp;
 				addToLog(avgVal);			  // add to cyclic log buffer
 				lastminute = timeinfo.tm_min; // every minute
-				if (avgVal.co2 < 405) {		  //
-					ESP_LOGI(TAG, "CO2 value too low, Calibrate");
-					airSensor.setForcedRecalibrationFactor(410);
-				}
+			 	ESP_LOGI(TAG, "CO2 value: %f ",avgVal.co2);
+
+				// if (avgVal.co2 < 405) {		  //
+				// 	ESP_LOGI(TAG, "CO2 value too low, Calibrate");
+				// 	airSensor.setForcedRecalibrationFactor(410);
+				// }
 			}
 #endif
 		}

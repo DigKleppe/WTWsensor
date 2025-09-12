@@ -41,7 +41,7 @@ extern char myIpAddress[];
 
 #define STATIC_NETMASK_ADDR "255.255.255.0"
 #define DEFAULT_IPADDRESS 	"192.168.2.50"
-#define DEFAULT_GW		 	"192.168.2.255"
+#define DEFAULT_GW		 	"192.168.2.1"
 
 extern bool DHCPoff;
 extern bool DNSoff;
