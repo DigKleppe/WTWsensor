@@ -37,7 +37,7 @@ extern const char server_root_cert_pem_start[] asm("_binary_ca_cert_pem_start");
 const char * dummy;
 int moduleNr;
 
-const char firmWareVersion[] = { "0.3"} ; // just for info , set this in firmWareVersion.txt for update
+const char firmWareVersion[] = { "0.41"} ; // just for info , set this in firmWareVersion.txt for update
 
 const char * getFirmWareVersion () {
 	return firmWareVersion;

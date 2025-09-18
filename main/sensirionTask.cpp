@@ -26,6 +26,7 @@
 #define OLDUDPTXPORT 5001
 #define MAXRETRIES 5
 #define SCD30_TIMEOUT 2500 // * 10ms
+#define CO2AUTOCALTIME 15 // minutes 
 
 // #define SIMULATE
 
@@ -123,6 +124,7 @@ void sensirionTask(void *pvParameter) {
 	time_t now = 0;
 	struct tm timeinfo;
 	int lastminute = -1;
+	int co2autoCalTimer = CO2AUTOCALTIME;
 
 	char str[80];
 
@@ -199,12 +201,20 @@ void sensirionTask(void *pvParameter) {
 				avgVal.timeStamp = timeStamp;
 				addToLog(avgVal);			  // add to cyclic log buffer
 				lastminute = timeinfo.tm_min; // every minute
-			 	ESP_LOGI(TAG, "CO2 value: %f ",avgVal.co2);
+				ESP_LOGI(TAG, "CO2 value: %f ", avgVal.co2);
 
-				// if (avgVal.co2 < 405) {		  //
-				// 	ESP_LOGI(TAG, "CO2 value too low, Calibrate");
-				// 	airSensor.setForcedRecalibrationFactor(410);
-				// }
+				if (userSettings.isCalibrated && (avgVal.co2 < 400)) {
+					if (co2autoCalTimer > 0)
+					 	co2autoCalTimer--;
+					else {
+						ESP_LOGI(TAG, "CO2 value too low, Calibrate");
+						airSensor.setForcedRecalibrationFactor(410);
+						co2autoCalTimer = CO2AUTOCALTIME;
+						co2Averager.clear();
+					}
+				}
+				else
+					co2autoCalTimer = CO2AUTOCALTIME;
 			}
 #endif
 		}
@@ -212,6 +222,10 @@ void sensirionTask(void *pvParameter) {
 			calvaluesReceived = false;
 			if (calValues.CO2 != NOCAL) { // then real CO2 received
 				airSensor.setForcedRecalibrationFactor(calValues.CO2);
+				if (!userSettings.isCalibrated) {
+					userSettings.isCalibrated = true;
+					saveSettings();
+				}
 				calValues.CO2 = NOCAL;
 			}
 		}
@@ -258,23 +272,23 @@ int getInfoValuesScript(char *pBuffer, int count) {
 		len = sprintf(pBuffer, "%s\n", "Naam,Waarde");
 		len += sprintf(pBuffer + len, "%s,%s\n", "Sensornaam", userSettings.moduleName);
 		len += sprintf(pBuffer + len, "%s,%3.0f\n", "CO2", avgVal.co2);
-		len += sprintf(pBuffer + len, "%s,%3.2f\n", "temperatuur", avgVal.temperature - userSettings.temperatureOffset);
+		len += sprintf(pBuffer + len, "%s,%3.2f\n", "Temperatuur", avgVal.temperature - userSettings.temperatureOffset);
 		len += sprintf(pBuffer + len, "%s,%3.1f\n", "Vochtigheid", avgVal.hum - userSettings.RHoffset);
 		return len;
 	case 1:
 		scriptState++;
-		len = sprintf(pBuffer, "%s,%1.2f\n", "temperatuur offset", userSettings.temperatureOffset);
+		len = sprintf(pBuffer, "%s,%1.2f\n", "Temperatuur offset", userSettings.temperatureOffset);
 		len += sprintf(pBuffer + len, "%s,%1.2f\n", "RH offset", userSettings.RHoffset);
 		len += sprintf(pBuffer + len, "%s,%d\n", "RSSI", getRssi());
-		len += sprintf(pBuffer + len, "%s,%s\n", "firmwareversie", getFirmWareVersion());
+		len += sprintf(pBuffer + len, "%s,%s\n", "Firmwareversie", getFirmWareVersion());
 		len += sprintf(pBuffer + len, "%s,%s\n", "SPIFFS versie", wifiSettings.SPIFFSversion);
 		return len;
 		break;
 	case 2:
 		scriptState++;
-		len = sprintf(pBuffer, "%s,%d\n", "timeouts", timeOuts);
-		len += sprintf(pBuffer + len, "%s,%d\n", "retriestotal", retriestotal);
-		len += sprintf(pBuffer + len, "%s,%d\n", "Sensor resets", resets);
+		// len = sprintf(pBuffer, "%s,%d\n", "timeouts", timeOuts);
+		// len += sprintf(pBuffer + len, "%s,%d\n", "retriestotal", retriestotal);
+		// len += sprintf(pBuffer + len, "%s,%d\n", "Sensor resets", resets);
 		len += sprintf(pBuffer + len, "%s,%lu\n", "timeStamp", (unsigned long)timeStamp);
 		return len;
 		break;

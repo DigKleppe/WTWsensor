@@ -23,8 +23,8 @@ typedef struct {
 	char moduleName[MAX_STRLEN+1];
 	char spiffsVersion[16]; // holding current version
 	float temperatureOffset;
-	float CO2offset;
 	float RHoffset;
+	float isCalibrated;  // float to be compatible 
 	char checkstr[MAX_STRLEN+1];
 }userSettings_t;
 
