@@ -6,15 +6,15 @@
 #include "updateTask.h"
 
 #include "autoCalTask.h"
+#include "clockTask.h"
 #include "sensirionTask.h"
 #include "settings.h"
 #include "wifiConnect.h"
-#include "clockTask.h"
 
-#include <stdbool.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <led_strip.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #define SDA_PIN 21 // 1			//21
@@ -31,17 +31,15 @@
 
 #define LED_TYPE LED_STRIP_WS2812
 #define LED_GPIO GPIO_NUM_4 //  GPIO_NUM_48
-#define CONFIG_LED_STRIP_LEN 1   
+#define CONFIG_LED_STRIP_LEN 1
 
-extern const char server_root_cert_pem_start[] asm("_binary_ca_cert_pem_start");  // dummy, to pull in for linker
-const char * dummy;
+extern const char server_root_cert_pem_start[] asm("_binary_ca_cert_pem_start"); // dummy, to pull in for linker
+const char *dummy;
 int moduleNr;
 
-const char firmWareVersion[] = { "0.41"} ; // just for info , set this in firmWareVersion.txt for update
+const char firmWareVersion[] = {"0.41"}; // just for info , set this in firmWareVersion.txt for update
 
-const char * getFirmWareVersion () {
-	return firmWareVersion;
-}
+const char *getFirmWareVersion() { return firmWareVersion; }
 esp_err_t init_spiffs(void);
 
 uint32_t timeStamp = 1; // global timestamp for logging
@@ -83,12 +81,14 @@ static const rgb_t colors[] = {
 
 void LEDtask(void *pvParameters) {
 	bool flash = false;
+	bool dimmTimerActive = false;
+	int dimmTimer = 15 * 60;
 
 	led_strip_t strip = {
 		.type = LED_TYPE,
 		.is_rgbw = false,
 #ifdef LED_STRIP_BRIGHTNESS
-		.brightness = 55,
+		.brightness = 50,
 #endif
 		.length = CONFIG_LED_STRIP_LEN,
 		.gpio = LED_GPIO,
@@ -100,6 +100,10 @@ void LEDtask(void *pvParameters) {
 
 	int c = 0;
 	while (1) {
+		if (dimmTimerActive) {
+			if (dimmTimer)
+				dimmTimer--;
+		}
 		if (sensirionError) {
 			c = 3; // rood
 			flash = true;
@@ -107,18 +111,23 @@ void LEDtask(void *pvParameters) {
 			switch ((int)connectStatus) {
 			case CONNECTING:
 				ESP_LOGI(TAG, "CONNECTING");
-				c = 4; 
+				c = 4;
 				break;
 
 			case WPS_ACTIVE:
 				ESP_LOGI(TAG, "WPS_ACTIVE");
+				if (dimmTimer == 0)
+					strip.brightness = 20;
 				flash = true;
-				c = 1; // blauw   
+				c = 1; // blauw
 				break;
 
 			case IP_RECEIVED:
 				//     ESP_LOGI(TAG, "IP_RECEIVED");
 				flash = false;
+				dimmTimerActive = true;
+				if (dimmTimer == 0)
+					strip.brightness = 7;
 				c = 2; // groen
 				break;
 
@@ -137,17 +146,13 @@ void LEDtask(void *pvParameters) {
 		led_strip_fill(&strip, 0, strip.length, colors[c]);
 		led_strip_flush(&strip);
 
-		if ( flash) {
-			vTaskDelay (pdMS_TO_TICKS(300));
-			led_strip_fill(&strip, 0, strip.length, colors[7]);
+		if (flash) {
+			vTaskDelay(pdMS_TO_TICKS(300));
+			led_strip_fill(&strip, 0, strip.length, colors[7]); // off
 			led_strip_flush(&strip);
-			vTaskDelay (pdMS_TO_TICKS(300));
-		}
-		else
+			vTaskDelay(pdMS_TO_TICKS(300));
+		} else
 			vTaskDelay(pdMS_TO_TICKS(1000));
-
-		// if (++c >= COLORS_TOTAL)
-		//     c = 0;
 	}
 }
 
@@ -156,10 +161,10 @@ extern "C" void app_main() {
 	esp_err_t err;
 	struct tm timeinfo;
 	int lastSecond = -1;
-// jumpers
-	ESP_ERROR_CHECK( gpio_input_enable(GPIO_NUM_25)); 
+	// jumpers
+	ESP_ERROR_CHECK(gpio_input_enable(GPIO_NUM_25));
 	ESP_ERROR_CHECK(gpio_input_enable(GPIO_NUM_26));
-	ESP_ERROR_CHECK(gpio_input_enable(GPIO_NUM_27)); 
+	ESP_ERROR_CHECK(gpio_input_enable(GPIO_NUM_27));
 	ESP_ERROR_CHECK(gpio_pullup_en(GPIO_NUM_25));
 	ESP_ERROR_CHECK(gpio_pullup_en(GPIO_NUM_26));
 	ESP_ERROR_CHECK(gpio_pullup_en(GPIO_NUM_27));
@@ -182,15 +187,15 @@ extern "C" void app_main() {
 	err = loadSettings();
 	vTaskDelay(10);
 	int n = 1;
-	if (gpio_get_level (GPIO_NUM_25) == 0) 
-		n+= 1;
-	if (gpio_get_level (GPIO_NUM_26)== 0) 
-		n+= 2;
-	
-	sprintf (userSettings.moduleName, "S%d", n );  // make modulenname "S1 .. S4"
-	ESP_LOGI(TAG, "moduleName:%s" , userSettings.moduleName);
-	moduleNr = n; 
-	
+	if (gpio_get_level(GPIO_NUM_25) == 0)
+		n += 1;
+	if (gpio_get_level(GPIO_NUM_26) == 0)
+		n += 2;
+
+	sprintf(userSettings.moduleName, "S%d", n); // make modulenname "S1 .. S4"
+	ESP_LOGI(TAG, "moduleName:%s", userSettings.moduleName);
+	moduleNr = n;
+
 	wifiConnect();
 
 	i2c_master_init();
@@ -199,14 +204,14 @@ extern "C" void app_main() {
 	led_strip_install();
 	xTaskCreate(LEDtask, "LEDtask", configMINIMAL_STACK_SIZE * 5, NULL, 5, NULL);
 
-	xTaskCreate(&updateTask, "updateTask",2* 8192, NULL, 5, NULL);
+	xTaskCreate(&updateTask, "updateTask", 2 * 8192, NULL, 5, NULL);
 
-	xTaskCreate(&autoCalTask, "autoCalTask",8192, NULL, 5, NULL);
+	xTaskCreate(&autoCalTask, "autoCalTask", 8192, NULL, 5, NULL);
 
 	do {
 		vTaskDelay(100);
 	} while (connectStatus != IP_RECEIVED);
-	
+
 	xTaskCreate(clockTask, "clock", 4 * 1024, NULL, 0, NULL);
 
 	while (1) {
@@ -218,7 +223,7 @@ extern "C" void app_main() {
 		if (lastSecond != timeinfo.tm_sec) {
 			lastSecond = timeinfo.tm_sec; // every second
 			timeStamp++;
-			if ( timeStamp == 0)
+			if (timeStamp == 0)
 				timeStamp++;
 		}
 	}
